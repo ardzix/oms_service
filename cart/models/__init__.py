@@ -49,10 +49,7 @@ class CartItem(models.Model):
         return f"Product {self.product.product_hash} in cart {self.cart.id}"
 
     def save(self, *args, **kwargs):
-        masterdata_client = MasterDataClient()
-        product = masterdata_client.get_product(self.product.product_hash)
-        
-        self.price = product.base_price  # Fetching base price from master data
+        self.price = self.product.price  # Fetching base price from master data
         
         promo_client = PromoClient()
 
