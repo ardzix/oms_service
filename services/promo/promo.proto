@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package promo;
+
+service PromoService {
+    rpc GetProductPromos (ProductPromoRequest) returns (ProductPromoResponse);
+    rpc CheckThresholdPromo (ThresholdPromoRequest) returns (ThresholdPromoResponse);
+    rpc GetPromoByHash (PromoByHashRequest) returns (PromoByHashResponse);
+}
+
+message ProductPromoRequest {
+    string product_hash = 1;
+}
+
+message ProductPromoResponse {
+    string discount_promo_hash = 1;
+    bool has_discount = 2;
+    double final_price = 3;
+    string bogo_promo_hash = 4;
+    bool is_bogo = 5;
+    repeated BuyXGetYPromoInfo buy_x_get_y_promos = 6;
+    repeated BundlePromoInfo bundle_promos = 7;
+    string point_purchase_promo_hash = 8;
+    bool can_purchase_by_points = 9;
+    int32 points_required = 10;
+}
+
+message BuyXGetYPromoInfo {
+    string promo_hash = 1;
+    string required_product_hash = 2;
+    string discounted_product_hash = 3;
+    double discounted_price = 4;
+}
+
+message BundlePromoInfo {
+    string promo_hash = 1;
+    repeated string product_hashes = 2;
+}
+
+message PromoByHashRequest {
+    string promo_hash = 1;
+}
+
+message PromoByHashResponse {
+    string name = 1;
+    string description = 2;
+    string promo_type = 3;
+    string start_date = 4;
+    string end_date = 5;
+    bool active = 6;
+    bool has_discount = 7;
+    double final_price = 8;
+    bool is_bogo = 9;
+    repeated BuyXGetYPromoInfo buy_x_get_y_promos = 10;
+    repeated BundlePromoInfo bundle_promos = 11;
+    bool can_purchase_by_points = 12;
+    int32 points_required = 13;
+}
+
+message ThresholdPromoRequest {
+    double subtotal = 1;
+}
+
+message ThresholdPromoResponse {
+    bool has_threshold_promo = 1;
+    double discount_value = 2;
+}

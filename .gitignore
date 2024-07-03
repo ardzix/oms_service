@@ -1,0 +1,24 @@
+# cart
+cart/migrations/*
+!cart/migrations/__init__.py
+
+# channel
+channel/migrations/*
+!channel/migrations/__init__.py
+
+# checkout
+checkout/migrations/*
+!checkout/migrations/__init__.py
+
+#src folder
+src/
+
+# env file
+.env
+
+# Cache
+.DS_Store
+*.pyc
+
+# local db
+db.sqlite3
