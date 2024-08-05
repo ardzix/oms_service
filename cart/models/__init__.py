@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from google.protobuf.json_format import MessageToDict
-from services.masterdata.masterdata_client import MasterDataClient
+from services.catalogue.catalogue_client import CatalogueClient
 from services.promo.promo_client import PromoClient
 from channel.models import Product, Brand
 
@@ -58,17 +58,18 @@ class CartItem(models.Model):
 
             if promo_response and promo_response.active:
                 # Handle discount promo
-                if promo_response.has_discount:
-                    self.modified_price = promo_response.final_price
+                if promo_response.discount_promos:
+                    doscount_promo=promo_response.discount_promos[0]
+                    self.modified_price = doscount_promo.final_price
 
                 # Handle BOGO promo
-                if promo_response.is_bogo and self.quantity >= 2:
+                if promo_response.bogo_promos and self.quantity >= 2:
                     self.is_bogo = True
                     self.bogo_quantity = self.quantity // 2
                     self.modified_price = (self.quantity - self.bogo_quantity) * self.price
 
                 # Handle point purchase promo
-                if promo_response.can_purchase_by_points:
+                if promo_response.point_purchase_promos:
                     self.is_point_purchase = True
                     self.points_payable = promo_response.points_required
             else:

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from services.masterdata.masterdata_client import MasterDataClient
+from services.catalogue.catalogue_client import CatalogueClient
 from services.promo.promo_client import PromoClient
 
 class Checkout(models.Model):
@@ -13,7 +13,7 @@ class Checkout(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        masterdata_client = MasterDataClient()
+        masterdata_client = CatalogueClient()
         promo_client = PromoClient()
 
         cart_items = self.cart.cartitem_set.all()

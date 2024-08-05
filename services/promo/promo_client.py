@@ -3,7 +3,7 @@ from django.conf import settings
 from . import promo_pb2, promo_pb2_grpc
 
 class PromoClient:
-    def __init__(self, host=settings.PROMO_SERVICE_HOST, port=settings.PROMO_SERVICE_PORT):
+    def __init__(self, host=settings.PPL_PROMO_SERVICE_HOST, port=settings.PPL_PROMO_SERVICE_PORT):
         self.channel = grpc.insecure_channel(f'{host}:{port}')
         self.stub = promo_pb2_grpc.PromoServiceStub(self.channel)
 
