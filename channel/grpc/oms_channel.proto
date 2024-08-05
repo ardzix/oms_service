@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package oms_channel;
+
+service ChannelService {
+    // List all brands
+    rpc ListBrands(Empty) returns (ListBrandsResponse);
+
+    // List all channels
+    rpc ListChannels(Empty) returns (ListChannelsResponse);
+
+    // List all events
+    rpc ListEvents(Empty) returns (ListEventsResponse);
+
+    // CRUD operations for products and variants
+    rpc GetProduct(GetProductRequest) returns (ProductResponse);
+    rpc CreateProduct(CreateProductRequest) returns (ProductResponse);
+    rpc UpdateProduct(UpdateProductRequest) returns (ProductResponse);
+    rpc DeleteProduct(DeleteProductRequest) returns (Empty);
+    rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+
+    rpc GetProductVariant(GetProductVariantRequest) returns (ProductVariantResponse);
+    rpc CreateProductVariant(CreateProductVariantRequest) returns (ProductVariantResponse);
+    rpc UpdateProductVariant(UpdateProductVariantRequest) returns (ProductVariantResponse);
+    rpc DeleteProductVariant(DeleteProductVariantRequest) returns (Empty);
+    rpc ListProductVariants(ListProductVariantsRequest) returns (ListProductVariantsResponse);
+}
+
+// Request and response messages for listing brands
+message Empty {}
+
+message ListBrandsResponse {
+    repeated Brand brands = 1;
+}
+
+message Brand {
+    string hash = 1;
+    string name = 2;
+    string description = 3;
+    bool is_active = 4;
+}
+
+// Request and response messages for listing channels
+message ListChannelsResponse {
+    repeated Channel channels = 1;
+}
+
+message Channel {
+    string hash = 1;
+    string name = 2;
+    string description = 3;
+    string brand_hash = 4;
+}
+
+// Request and response messages for listing events
+message ListEventsResponse {
+    repeated Event events = 1;
+}
+
+message Event {
+    string hash = 1;
+    string name = 2;
+    string description = 3;
+    string start_date = 4;
+    string end_date = 5;
+    string channel_hash = 6;
+    string brand_hash = 7;
+}
+
+// Request and response messages for CRUD operations on products
+message GetProductRequest {
+    string product_hash = 1;
+}
+
+message CreateProductRequest {
+    string product_hash = 1;
+    string channel_hash = 2;
+    string event_hash = 3; // Nullable
+    string brand_hash = 4;
+    bool available = 5;
+    double price = 6;
+    bool is_valid = 7;
+}
+
+message UpdateProductRequest {
+    string product_hash = 1;
+    string channel_hash = 2;
+    string event_hash = 3; // Nullable
+    string brand_hash = 4;
+    bool available = 5;
+    double price = 6;
+    bool is_valid = 7;
+}
+
+message DeleteProductRequest {
+    string product_hash = 1;
+}
+
+message ProductResponse {
+    string product_hash = 1;
+    string channel_hash = 2;
+    string event_hash = 3; // Nullable
+    string brand_hash = 4;
+    bool available = 5;
+    double price = 6;
+    bool is_valid = 7;
+}
+
+message ListProductsRequest {
+    string channel_hash = 1;
+    string event_hash = 2; // Nullable
+}
+
+message ListProductsResponse {
+    repeated ProductResponse products = 1;
+}
+
+// Request and response messages for CRUD operations on product variants
+message GetProductVariantRequest {
+    string variant_hash = 1;
+}
+
+message CreateProductVariantRequest {
+    string parent_hash = 1; // The parent product or variant's hash
+    string variant_hash = 2;
+    string channel_hash = 3;
+    string event_hash = 4; // Nullable
+    string brand_hash = 5;
+    bool available = 6;
+    double price = 7;
+    bool is_valid = 8;
+}
+
+message UpdateProductVariantRequest {
+    string parent_hash = 1;
+    string variant_hash = 2;
+    string channel_hash = 3;
+    string event_hash = 4; // Nullable
+    string brand_hash = 5;
+    bool available = 6;
+    double price = 7;
+    bool is_valid = 8;
+}
+
+message DeleteProductVariantRequest {
+    string variant_hash = 1;
+}
+
+message ProductVariantResponse {
+    string parent_hash = 1;
+    string variant_hash = 2;
+    string channel_hash = 3;
+    string event_hash = 4; // Nullable
+    string brand_hash = 5;
+    bool available = 6;
+    double price = 7;
+    bool is_valid = 8;
+}
+
+message ListProductVariantsRequest {
+    string parent_hash = 1;
+}
+
+message ListProductVariantsResponse {
+    repeated ProductVariantResponse variants = 1;
+}

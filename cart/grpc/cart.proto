@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package cart;
+
+service CartService {
+    // Get or create a cart by user_hash and brand_hash
+    rpc GetOrCreateCart(GetOrCreateCartRequest) returns (GetOrCreateCartResponse);
+    
+    // Get cart details by cart hash
+    rpc GetCartDetail(GetCartDetailRequest) returns (GetCartDetailResponse);
+
+    // Add an item to the cart
+    rpc AddToCart(AddToCartRequest) returns (AddToCartResponse);
+
+    // Remove an item from the cart
+    rpc RemoveCartItem(RemoveCartItemRequest) returns (RemoveCartItemResponse);
+
+    // Clear all items from the cart
+    rpc ClearCart(ClearCartRequest) returns (ClearCartResponse);
+}
+
+message GetOrCreateCartRequest {
+    string user_hash = 1;
+    string brand_hash = 2;
+}
+
+message GetOrCreateCartResponse {
+    Cart cart = 1;
+}
+
+message GetCartDetailRequest {
+    string cart_hash = 1;
+}
+
+message GetCartDetailResponse {
+    Cart cart = 1;
+    repeated CartItem cart_items = 2;
+}
+
+message AddToCartRequest {
+    string cart_hash = 1;
+    string product_hash = 2;
+    int32 quantity = 3;
+}
+
+message AddToCartResponse {
+    CartItem cart_item = 1;
+}
+
+message RemoveCartItemRequest {
+    string cart_hash = 1;
+    string product_hash = 2;
+}
+
+message RemoveCartItemResponse {
+    bool success = 1;
+}
+
+message ClearCartRequest {
+    string cart_hash = 1;
+}
+
+message ClearCartResponse {
+    bool success = 1;
+}
+
+message Cart {
+    string hash = 1;
+    string user_hash = 2;
+    string brand_hash = 3;
+    bool is_active = 4;
+    string created_at = 5;
+    string updated_at = 6;
+}
+
+message CartItem {
+    string product_hash = 1;
+    int32 quantity = 2;
+    double price = 3;
+    string promo_hash = 4;
+    double modified_price = 5;
+    bool is_bogo = 6;
+    int32 bogo_quantity = 7;
+    bool is_point_purchase = 8;
+    int32 points_payable = 9;
+}

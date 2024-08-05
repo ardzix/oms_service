@@ -1,0 +1,1 @@
+python -m grpc_tools.protoc -I./cart/grpc --python_out=cart/grpc/ --grpc_python_out=cart/grpc/ ./cart/grpc/cart.proto

@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from google.protobuf.json_format import MessageToDict
@@ -12,6 +13,7 @@ class Cart(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
 
     def __str__(self):
         return f"Cart {self.id} for user {self.user_hash}"
