@@ -14,14 +14,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Set environment variables
-ENV DJANGO_SETTINGS_MODULE=masterdata.settings
+ENV DJANGO_SETTINGS_MODULE=oms.settings
 ENV PYTHONUNBUFFERED=1
 
 # Collect static files
-RUN python manage.py collectstatic --noinput
+# RUN python manage.py collectstatic --noinput
 
-# Expose port 8000 for Django and 50051-50053 for gRPC
-EXPOSE 8000 50051 50052 50053
+# Expose port for gRPC
+EXPOSE 50057 50058
 
-# Run the command to start both the Django server and the gRPC server
-CMD ["sh", "-c", "python manage.py migrate && (python manage.py runserver 0.0.0.0:8000 &) && python server.py"]
+# Run the command to start uWSGI
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python server.py"]

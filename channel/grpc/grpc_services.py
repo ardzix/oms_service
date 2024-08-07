@@ -136,12 +136,18 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
         except Product.DoesNotExist:
             context.abort(grpc.StatusCode.NOT_FOUND, "Product not found")
 
-    # List products by channel and event (optional)
+
+    # List products by channel, event (optional), and brand (optional)
     def ListProducts(self, request, context):
-        logger.info(f"Received ListProducts request for channel_hash: {request.channel_hash}, event_hash: {request.event_hash}")
+        logger.info(f"Received ListProducts request for channel_hash: {request.channel_hash}, event_hash: {request.event_hash}, brand_hash: {request.brand_hash}")
         products = Product.objects.filter(channel__hash=request.channel_hash)
+        
         if request.event_hash:
             products = products.filter(event__hash=request.event_hash)
+        
+        if request.brand_hash:
+            products = products.filter(brand__hash=request.brand_hash)
+        
         response = oms_channel_pb2.ListProductsResponse()
         for product in products:
             response.products.add(
@@ -154,6 +160,7 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
                 is_valid=product.is_valid
             )
         return response
+
 
     # Get a product variant by variant_hash
     def GetProductVariant(self, request, context):

@@ -109,6 +109,7 @@ message ProductResponse {
 message ListProductsRequest {
     string channel_hash = 1;
     string event_hash = 2; // Nullable
+    string brand_hash = 3; // New field added as a filter
 }
 
 message ListProductsResponse {
