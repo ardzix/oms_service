@@ -141,6 +141,7 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
     def ListProducts(self, request, context):
         logger.info(f"Received ListProducts request for channel_hash: {request.channel_hash}, event_hash: {request.event_hash}, brand_hash: {request.brand_hash}")
         products = Product.objects.filter(channel__hash=request.channel_hash)
+        logger.info(products.values('product_hash'))
         
         if request.event_hash and request.event_hash == 'all':
             pass
@@ -151,7 +152,7 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
         
         if request.brand_hash:
             products = products.filter(brand__hash=request.brand_hash)
-        
+        logger.info(products.values('product_hash'))
         response = oms_channel_pb2.ListProductsResponse()
         for product in products:
             response.products.add(
