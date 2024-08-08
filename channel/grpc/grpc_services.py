@@ -140,8 +140,11 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
     # List products by channel, event (optional), and brand (optional)
     def ListProducts(self, request, context):
         logger.info(f"Received ListProducts request for channel_hash: {request.channel_hash}, event_hash: {request.event_hash}, brand_hash: {request.brand_hash}")
-        products = Product.objects.filter(channel__hash=request.channel_hash)
-        logger.info(products.values('product_hash'))
+        
+        if not request.channel_hash and not request.brand_hash:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Channel and Brand hash is required to perform this action")
+
+        products = Product.objects.filter(channel__hash=request.channel_hash, brand__hash=request.brand_hash, parent__isnull=True)
         
         if request.event_hash and request.event_hash == 'all':
             pass
@@ -149,10 +152,7 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
             products = products.filter(event__hash__isnull=True)
         elif request.event_hash:
             products = products.filter(event__hash=request.event_hash)
-        
-        if request.brand_hash:
-            products = products.filter(brand__hash=request.brand_hash)
-        logger.info(products.values('product_hash'))
+
         response = oms_channel_pb2.ListProductsResponse()
         for product in products:
             response.products.add(
