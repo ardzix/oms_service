@@ -142,7 +142,11 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
         logger.info(f"Received ListProducts request for channel_hash: {request.channel_hash}, event_hash: {request.event_hash}, brand_hash: {request.brand_hash}")
         products = Product.objects.filter(channel__hash=request.channel_hash)
         
-        if request.event_hash:
+        if request.event_hash and request.event_hash == 'all':
+            pass
+        elif request.event_hash and request.event_hash == 'global':
+            products = products.filter(event__hash__isnull=True)
+        elif request.event_hash:
             products = products.filter(event__hash=request.event_hash)
         
         if request.brand_hash:
