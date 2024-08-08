@@ -72,6 +72,8 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
             )
         except Product.DoesNotExist:
             context.abort(grpc.StatusCode.NOT_FOUND, "Product not found")
+        except Exception as e:
+            context.abort(grpc.StatusCode.ABORTED, str(e))
 
     # Create a new product
     def CreateProduct(self, request, context):
@@ -144,7 +146,10 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
         if not request.channel_hash and not request.brand_hash:
             context.abort(grpc.StatusCode.NOT_FOUND, "Channel and Brand hash is required to perform this action")
 
-        products = Product.objects.filter(channel__hash=request.channel_hash, brand__hash=request.brand_hash, parent__isnull=True)
+        try:
+            products = Product.objects.filter(channel__hash=request.channel_hash, brand__hash=request.brand_hash, parent__isnull=True)
+        except Exception as e:
+            context.abort(grpc.StatusCode.ABORTED, str(e))
         
         if request.event_hash and request.event_hash == 'all':
             pass
