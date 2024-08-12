@@ -1,0 +1,1 @@
+python -m grpc_tools.protoc -I./checkout/grpc --python_out=checkout/grpc/ --grpc_python_out=checkout/grpc/ ./checkout/grpc/checkout.proto

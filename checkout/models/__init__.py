@@ -1,10 +1,12 @@
+import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from services.catalogue.catalogue_client import CatalogueClient
 from services.promo.promo_client import PromoClient
 
 class Checkout(models.Model):
-    user_hash = models.CharField(max_length=255, unique=True)
+    user_hash = models.CharField(max_length=255)
+    hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
     cart = models.ForeignKey('cart.Cart', on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -37,6 +39,9 @@ class Checkout(models.Model):
         self.final_price = discounted_subtotal - self.discount + self.vat
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Checkout {self.hash} - Total: {self.final_price}"
 
     class Meta:
         verbose_name = _("Checkout")

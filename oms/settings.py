@@ -14,6 +14,10 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
+
+# Load environment variables from .env file
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -80,8 +84,12 @@ WSGI_APPLICATION = 'oms.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DATABASE_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.getenv('DATABASE_NAME', os.path.join(BASE_DIR, 'db.sqlite3')),
+        'USER': os.getenv('DATABASE_USER', ''),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+        'HOST': os.getenv('DATABASE_HOST', ''),
+        'PORT': os.getenv('DATABASE_PORT', ''),
     }
 }
 
@@ -127,10 +135,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# Load environment variables from .env file
-load_dotenv()
-
 # Get the host and port for the gRPC services
 MD_CATALOGUE_SERVICE_HOST = os.getenv('MD_CATALOGUE_SERVICE_HOST', 'localhost')
 MD_CATALOGUE_SERVICE_PORT = os.getenv('MD_CATALOGUE_SERVICE_PORT', '50051')
@@ -148,3 +152,5 @@ OMS_CART_SERVICE_HOST = os.getenv('OMS_CART_SERVICE_HOST', 'localhost')
 OMS_CART_SERVICE_PORT = os.getenv('OMS_CART_SERVICE_PORT', '50057')
 OMS_CHANNEL_SERVICE_HOST = os.getenv('OMS_CHANNEL_SERVICE_HOST', 'localhost')
 OMS_CHANNEL_SERVICE_PORT = os.getenv('OMS_CHANNEL_SERVICE_PORT', '50058')
+OMS_CHECKOUT_SERVICE_HOST = os.getenv('OMS_CHECKOUT_SERVICE_HOST', 'localhost')
+OMS_CHECKOUT_SERVICE_PORT = os.getenv('OMS_CHECKOUT_SERVICE_PORT', '50059')

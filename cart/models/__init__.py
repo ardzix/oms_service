@@ -8,12 +8,12 @@ from channel.models import Product, Brand
 
 
 class Cart(models.Model):
-    user_hash = models.CharField(max_length=255, unique=True)
+    user_hash = models.CharField(max_length=255)
+    hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
 
     def __str__(self):
         return f"Cart {self.id} for user {self.user_hash}"

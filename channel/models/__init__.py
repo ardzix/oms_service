@@ -56,7 +56,8 @@ class Product(models.Model):
     is_valid = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Product {self.product_hash} on {self.channel.name}"
+        name = f"Variant {self.variant_hash}" if self.variant_hash else f"Product {self.product_hash}"
+        return f"{name} on channel {self.channel.name} (event: {self.event})"
 
     class Meta:
         verbose_name = _("Product")

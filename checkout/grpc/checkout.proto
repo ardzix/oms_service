@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package checkout;
+
+service CheckoutService {
+    rpc CreateCheckout(CreateCheckoutRequest) returns (CheckoutResponse);
+    rpc ListCheckouts(ListCheckoutsRequest) returns (ListCheckoutsResponse);
+    rpc GetCheckoutDetail(GetCheckoutDetailRequest) returns (CheckoutDetailResponse);
+    rpc UpdateCheckout(UpdateCheckoutRequest) returns (CheckoutResponse);
+    rpc DeleteCheckout(DeleteCheckoutRequest) returns (Empty);
+}
+
+message CreateCheckoutRequest {
+    string cart_hash = 1;
+    string user_hash = 2;
+}
+
+message UpdateCheckoutRequest {
+    string hash = 1;
+    double total_price = 2;
+    double discount = 3;
+    double vat = 4;
+    double final_price = 5;
+}
+
+message DeleteCheckoutRequest {
+    string hash = 1;
+}
+
+message ListCheckoutsRequest {
+    string user_hash = 1;
+}
+
+message GetCheckoutDetailRequest {
+    string hash = 1;
+}
+
+message CheckoutResponse {
+    string hash = 1;
+    string user_hash = 2;
+    string cart_hash = 3;
+    double total_price = 4;
+    double discount = 5;
+    double vat = 6;
+    double final_price = 7;
+    string created_at = 8;
+}
+
+message CheckoutDetailResponse {
+    CheckoutResponse checkout = 1;
+    InvoiceResponse invoice = 2;
+}
+
+message ListCheckoutsResponse {
+    repeated CheckoutResponse checkouts = 1;
+}
+
+message InvoiceResponse {
+    string invoice_number = 1;
+    string status = 2;
+    string created_at = 3;
+}
+
+message Empty {}
