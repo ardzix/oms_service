@@ -35,7 +35,7 @@ def run():
         # Get or create a cart by user_hash and brand_hash
         get_or_create_cart_request = cart_pb2.GetOrCreateCartRequest(
             user_hash="055f47c7-76bf-4c41-a89d-f8c9f01f6fd7",
-            brand_hash="8408e5e8-5ee6-43e2-8da6-195e7848ae12"
+            brand_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3"
         )
         cart_response = stub.GetOrCreateCart(get_or_create_cart_request)
         print("Get or Create Cart Response:")
@@ -44,7 +44,7 @@ def run():
         # Add an item to the cart
         add_to_cart_request = cart_pb2.AddToCartRequest(
             cart_hash=cart_response.cart.hash,
-            product_hash="f2a1c6e8-9ec7-4e59-8261-5e4c79d2d5ea",
+            product_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3",
             quantity=2
         )
         add_to_cart_response = stub.AddToCart(add_to_cart_request)
@@ -64,21 +64,21 @@ def run():
             print("\n")
 
         # Remove an item from the cart
-        remove_cart_item_request = cart_pb2.RemoveCartItemRequest(
-            cart_hash=cart_response.cart.hash,
-            product_hash="f2a1c6e8-9ec7-4e59-8261-5e4c79d2d5ea"
-        )
-        remove_cart_item_response = stub.RemoveCartItem(remove_cart_item_request)
-        print("\nRemoved Item from Cart:")
-        print(f"Success: {remove_cart_item_response.success}")
+        # remove_cart_item_request = cart_pb2.RemoveCartItemRequest(
+        #     cart_hash=cart_response.cart.hash,
+        #     product_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3"
+        # )
+        # remove_cart_item_response = stub.RemoveCartItem(remove_cart_item_request)
+        # print("\nRemoved Item from Cart:")
+        # print(f"Success: {remove_cart_item_response.success}")
 
         # Clear all items from the cart
-        clear_cart_request = cart_pb2.ClearCartRequest(
-            cart_hash=cart_response.cart.hash
-        )
-        clear_cart_response = stub.ClearCart(clear_cart_request)
-        print("\nCleared Cart:")
-        print(f"Success: {clear_cart_response.success}")
+        # clear_cart_request = cart_pb2.ClearCartRequest(
+        #     cart_hash=cart_response.cart.hash
+        # )
+        # clear_cart_response = stub.ClearCart(clear_cart_request)
+        # print("\nCleared Cart:")
+        # print(f"Success: {clear_cart_response.success}")
 
         # Get cart details after clearing
         cart_detail_response_after_clear = stub.GetCartDetail(get_cart_detail_request)

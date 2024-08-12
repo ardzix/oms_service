@@ -8,6 +8,8 @@ grpcio-tools==1.64.1
 multidict==6.0.5
 pillow==10.3.0
 protobuf==5.27.1
+psycopg2-binary==2.9.9
 pulsar-client==3.5.0
 python-dotenv==1.0.1
+setuptools==72.1.0
 sqlparse==0.5.0

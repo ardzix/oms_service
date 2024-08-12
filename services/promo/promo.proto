@@ -9,8 +9,6 @@ service PromoService {
     rpc CreatePromo (CreatePromoRequest) returns (PromoResponse);
     rpc GetPromosByBrandChannelEvent (PromosByBrandChannelEventRequest) returns (PromosByBrandChannelEventResponse);
     rpc ListPromos (ListPromosRequest) returns (ListPromosResponse);
-    rpc UpdatePromo (UpdatePromoRequest) returns (PromoResponse);  // Service for updating a promo
-    rpc DeletePromo (DeletePromoRequest) returns (DeletePromoResponse);  // Service for deleting a promo
 }
 
 message ProductPromoRequest {
@@ -18,29 +16,19 @@ message ProductPromoRequest {
 }
 
 message ProductPromoResponse {
-    repeated DiscountPromoInfo discount_promos = 1;
-    repeated BogoPromoInfo bogo_promos = 2;
-    repeated BuyXGetYPromoInfo buy_x_get_y_promos = 3;
-    repeated BundlePromoInfo bundle_promos = 4;
-    repeated PointPurchasePromoInfo point_purchase_promos = 5;
-    string brand_hash = 6;
-    string channel_hash = 7;
-    string event_hash = 8;
-}
-
-message DiscountPromoInfo {
-    string promo_hash = 1;
-    string discount_type = 2;
-    double discount_value = 3;
-    string product_hash = 4;
-    double final_price = 5;
-}
-
-message BogoPromoInfo {
-    string promo_hash = 1;
-    string required_product_hash = 2;
-    string free_product_hash = 3;
-    double discounted_price = 4;
+    string discount_promo_hash = 1;
+    bool has_discount = 2;
+    double final_price = 3;
+    string bogo_promo_hash = 4;
+    bool is_bogo = 5;
+    repeated BuyXGetYPromoInfo buy_x_get_y_promos = 6;
+    repeated BundlePromoInfo bundle_promos = 7;
+    string point_purchase_promo_hash = 8;
+    bool can_purchase_by_points = 9;
+    int32 points_required = 10;
+    string brand_hash = 11;
+    string channel_hash = 12;
+    string event_hash = 13;
 }
 
 message BuyXGetYPromoInfo {
@@ -55,12 +43,6 @@ message BundlePromoInfo {
     repeated string product_hashes = 2;
 }
 
-message PointPurchasePromoInfo {
-    string promo_hash = 1;
-    string product_hash = 2;
-    int32 points_required = 3;
-}
-
 message PromoByHashRequest {
     string promo_hash = 1;
 }
@@ -72,14 +54,16 @@ message PromoByHashResponse {
     string start_date = 4;
     string end_date = 5;
     bool active = 6;
-    repeated DiscountPromoInfo discount_promos = 7;
-    repeated BogoPromoInfo bogo_promos = 8;
-    repeated BuyXGetYPromoInfo buy_x_get_y_promos = 9;
-    repeated BundlePromoInfo bundle_promos = 10;
-    repeated PointPurchasePromoInfo point_purchase_promos = 11;
-    string brand_hash = 12;
-    string channel_hash = 13;
-    string event_hash = 14;
+    bool has_discount = 7;
+    double final_price = 8;
+    bool is_bogo = 9;
+    repeated BuyXGetYPromoInfo buy_x_get_y_promos = 10;
+    repeated BundlePromoInfo bundle_promos = 11;
+    bool can_purchase_by_points = 12;
+    int32 points_required = 13;
+    string brand_hash = 14;
+    string channel_hash = 15;
+    string event_hash = 16;
 }
 
 message CreatePromoRequest {
@@ -99,34 +83,6 @@ message CreatePromoRequest {
     BundlePromoDetails bundle_promo = 13;
     ThresholdPromoDetails threshold_promo = 14;
     PointPurchasePromoDetails point_purchase_promo = 15;
-}
-
-message UpdatePromoRequest {
-    string promo_hash = 1;
-    string name = 2;
-    string description = 3;
-    string promo_type = 4;
-    string start_date = 5;
-    string end_date = 6;
-    bool active = 7;
-    string brand_hash = 8;
-    string channel_hash = 9;
-    string event_hash = 10;
-
-    DiscountPromoDetails discount_promo = 11;
-    BogoPromoDetails bogo_promo = 12;
-    BuyXGetYPromoDetails buy_x_get_y_promo = 13;
-    BundlePromoDetails bundle_promo = 14;
-    ThresholdPromoDetails threshold_promo = 15;
-    PointPurchasePromoDetails point_purchase_promo = 16;
-}
-
-message DeletePromoRequest {
-    string promo_hash = 1;
-}
-
-message DeletePromoResponse {
-    bool success = 1;
 }
 
 message DiscountPromoDetails {

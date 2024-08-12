@@ -48,7 +48,7 @@ class CartItem(models.Model):
     points_payable = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"Product {self.product.product_hash} in cart {self.cart.id}"
+        return f"{self.product} in cart {self.cart.id}"
 
     def save(self, *args, **kwargs):
         self.price = self.product.price  # Fetching base price from master data
@@ -85,10 +85,11 @@ class CartItem(models.Model):
             else:
                 self.modified_price = self.price
 
-        
         product_promo_response = promo_client.get_product_promos(self.product.product_hash)
+        print(product_promo_response)
         if product_promo_response:
             buy_x_get_y_promos_list = [MessageToDict(promo) for promo in product_promo_response.buy_x_get_y_promos]
+            print(buy_x_get_y_promos_list)
             for buy_x_get_y in buy_x_get_y_promos_list:
                 BuyXGetYPromo.objects.create(
                     promo_hash=buy_x_get_y.get('promoHash'),

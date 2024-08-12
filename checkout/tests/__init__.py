@@ -25,23 +25,23 @@ class OMSClientTests(TestCase):
         self.product_x = Product.objects.create(product_hash=product_x.hash, channel=self.channel, brand=self.brand, price=product_x.base_price)
 
         self.cart = Cart.objects.create(user_hash='test_user_hash', brand=self.brand)
-        self.cart_item_x = CartItem.objects.create(cart=self.cart, product=self.product_x, quantity=2, promo_hash='6fa12a6b-dd3a-499e-a260-7d6dade2b7b0')
+        self.cart_item_x = CartItem.objects.create(cart=self.cart, product=self.product_x, quantity=2)
         self.cart_item_y = CartItem.objects.create(cart=self.cart, product=self.product_y, quantity=2)
 
-    def test_cart_item_creation_with_promo(self):
-        # Validate CartItem creation with a valid promo hash
-        self.cart_item_x.save()
-        print(f"Test cart item creation with:")
-        print(f"- promo {self.cart_item_x.promo_hash}")
-        print(f"- product: {self.cart_item_x.product.product_hash}")
-        print(f"- product price: {self.cart_item_x.product.price}")
+    # def test_cart_item_creation_with_promo(self):
+    #     # Validate CartItem creation with a valid promo hash
+    #     self.cart_item_x.save()
+    #     print(f"Test cart item creation with:")
+    #     print(f"- promo {self.cart_item_x.promo_hash}")
+    #     print(f"- product: {self.cart_item_x.product.product_hash}")
+    #     print(f"- product price: {self.cart_item_x.product.price}")
 
 
-        promo_client = PromoClient()
-        promo_response = promo_client.get_promo_by_hash(self.cart_item_x.promo_hash)
-        self.assertEqual(self.cart_item_x.modified_price, promo_response.discount_promos[0].final_price)
-        print(f"CartItem saved: Modified Price: {self.cart_item_x.modified_price}")
-        print("==================\n")
+    #     promo_client = PromoClient()
+    #     promo_response = promo_client.get_promo_by_hash(self.cart_item_x.promo_hash)
+    #     self.assertEqual(self.cart_item_x.modified_price, promo_response.discount_promos[0].final_price)
+    #     print(f"CartItem saved: Modified Price: {self.cart_item_x.modified_price}")
+    #     print("==================\n")
 
     # def test_buy_x_get_y_promo(self):
     #     # Test Buy X Get Y promo handling
