@@ -64,7 +64,7 @@ def run():
         add_to_cart_request = cart_pb2.AddToCartRequest(
             cart_hash=cart_response.cart.hash,
             product_hash="e5712557-2a37-481e-bf69-679c708a7398",
-            quantity=2
+            quantity=4
         )
         add_to_cart_response = cart_stub.AddToCart(add_to_cart_request)
         print("\nAdded to Cart:")

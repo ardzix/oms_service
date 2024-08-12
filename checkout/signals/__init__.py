@@ -4,6 +4,14 @@ from ..models import Checkout, Invoice
 from django.utils.timezone import now
 
 @receiver(post_save, sender=Checkout)
+def invalidatate_cart(sender, instance, created, **kwargs):
+    if created:
+        cart = instance.cart
+        cart.is_active = False
+        cart.save()
+
+
+@receiver(post_save, sender=Checkout)
 def create_invoice(sender, instance, created, **kwargs):
     if created:
         # Get the current date
