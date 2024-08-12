@@ -70,6 +70,16 @@ def run():
         print("\nAdded to Cart:")
         print_cart_item(add_to_cart_response.cart_item)
 
+
+        # Apply promo to item cart
+        apply_promo_request = cart_pb2.ApplyCartItemPromoRequest(
+            cart_item_hash=add_to_cart_response.cart_item.hash,
+            promo_hash="b2efe181-b650-4938-bd15-cefcad1d5b32",
+        )
+        add_to_cart_response = cart_stub.ApplyCartItemPromo(apply_promo_request)
+        print("\Promo applied to Cart:")
+        print_cart_item(add_to_cart_response.cart_item)
+
         # Get cart details by cart hash
         get_cart_detail_request = cart_pb2.GetCartDetailRequest(
             cart_hash=cart_response.cart.hash

@@ -112,23 +112,45 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
             is_bogo=cart_item.is_bogo,
             bogo_quantity=cart_item.bogo_quantity,
             is_point_purchase=cart_item.is_point_purchase,
-            points_payable=cart_item.points_payable
+            points_payable=cart_item.points_payable,
+            hash=str(cart_item.hash)
         )
 
         logger.info(f"Item added to cart with cart_hash: {request.cart_hash}")
-        return cart_pb2.AddToCartResponse(cart_item=cart_item_response)
+        return cart_pb2.GetCartItemDetailResponse(cart_item=cart_item_response)
+    
+    def ApplyCartItemPromo(self, request, context):
+        logger.info(f"Received ApplyCartItemPromo request for cart_item_hash: {request.cart_item_hash}, promo_hash: {request.promo_hash}")
+        try:
+            cart_item = CartItem.objects.get(hash=request.cart_item_hash)
+            cart_item.promo_hash = request.promo_hash
+            cart_item.save()
+        except CartItem.DoesNotExist:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Cart item not found")
+            return cart_pb2.RemoveCartItemResponse(success=False)
+        
+        cart_item_response = cart_pb2.CartItem(
+            product_hash=cart_item.product.product_hash,
+            quantity=cart_item.quantity,
+            price=float(cart_item.price),
+            promo_hash=cart_item.promo_hash,
+            modified_price=float(cart_item.modified_price) if cart_item.modified_price else cart_item.price,
+            is_bogo=cart_item.is_bogo,
+            bogo_quantity=cart_item.bogo_quantity,
+            is_point_purchase=cart_item.is_point_purchase,
+            points_payable=cart_item.points_payable,
+            hash=str(cart_item.hash)
+        )
+
+        logger.info(f"Item promo {request.promo_hash} has been added to cart item with hash: {request.cart_item_hash}")
+        return cart_pb2.GetCartItemDetailResponse(cart_item=cart_item_response)
 
     def RemoveCartItem(self, request, context):
-        logger.info(f"Received RemoveCartItem request for cart_hash: {request.cart_hash}, product_hash: {request.product_hash}")
+        logger.info(f"Received RemoveCartItem request for cart_item_hash: {request.cart_item_hash}")
         try:
-            cart = Cart.objects.get(hash=request.cart_hash)
-        except Cart.DoesNotExist:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Cart not found")
-
-        try:
-            cart_item = CartItem.objects.get(cart=cart, product__product_hash=request.product_hash)
+            cart_item = CartItem.objects.get(hasattr=request.cart_item_hash)
             cart_item.delete()
-            logger.info(f"Removed product {request.product_hash} from cart {request.cart_hash}")
+            logger.info(f"Removed item {request.cart_item_hash} from cart {request.cart_hash}")
             return cart_pb2.RemoveCartItemResponse(success=True)
         except CartItem.DoesNotExist:
             context.abort(grpc.StatusCode.NOT_FOUND, "Cart item not found")

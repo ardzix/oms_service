@@ -52,7 +52,12 @@ class CartServiceStub(object):
         self.AddToCart = channel.unary_unary(
                 '/cart.CartService/AddToCart',
                 request_serializer=cart__pb2.AddToCartRequest.SerializeToString,
-                response_deserializer=cart__pb2.AddToCartResponse.FromString,
+                response_deserializer=cart__pb2.GetCartItemDetailResponse.FromString,
+                _registered_method=True)
+        self.ApplyCartItemPromo = channel.unary_unary(
+                '/cart.CartService/ApplyCartItemPromo',
+                request_serializer=cart__pb2.ApplyCartItemPromoRequest.SerializeToString,
+                response_deserializer=cart__pb2.GetCartItemDetailResponse.FromString,
                 _registered_method=True)
         self.RemoveCartItem = channel.unary_unary(
                 '/cart.CartService/RemoveCartItem',
@@ -90,6 +95,13 @@ class CartServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ApplyCartItemPromo(self, request, context):
+        """Apply promo to a cart item
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def RemoveCartItem(self, request, context):
         """Remove an item from the cart
         """
@@ -120,7 +132,12 @@ def add_CartServiceServicer_to_server(servicer, server):
             'AddToCart': grpc.unary_unary_rpc_method_handler(
                     servicer.AddToCart,
                     request_deserializer=cart__pb2.AddToCartRequest.FromString,
-                    response_serializer=cart__pb2.AddToCartResponse.SerializeToString,
+                    response_serializer=cart__pb2.GetCartItemDetailResponse.SerializeToString,
+            ),
+            'ApplyCartItemPromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.ApplyCartItemPromo,
+                    request_deserializer=cart__pb2.ApplyCartItemPromoRequest.FromString,
+                    response_serializer=cart__pb2.GetCartItemDetailResponse.SerializeToString,
             ),
             'RemoveCartItem': grpc.unary_unary_rpc_method_handler(
                     servicer.RemoveCartItem,
@@ -213,7 +230,34 @@ class CartService(object):
             target,
             '/cart.CartService/AddToCart',
             cart__pb2.AddToCartRequest.SerializeToString,
-            cart__pb2.AddToCartResponse.FromString,
+            cart__pb2.GetCartItemDetailResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ApplyCartItemPromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/cart.CartService/ApplyCartItemPromo',
+            cart__pb2.ApplyCartItemPromoRequest.SerializeToString,
+            cart__pb2.GetCartItemDetailResponse.FromString,
             options,
             channel_credentials,
             insecure,

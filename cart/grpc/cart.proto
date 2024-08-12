@@ -10,7 +10,10 @@ service CartService {
     rpc GetCartDetail(GetCartDetailRequest) returns (GetCartDetailResponse);
 
     // Add an item to the cart
-    rpc AddToCart(AddToCartRequest) returns (AddToCartResponse);
+    rpc AddToCart(AddToCartRequest) returns (GetCartItemDetailResponse);
+
+    // Apply promo to a cart item
+    rpc ApplyCartItemPromo(ApplyCartItemPromoRequest) returns (GetCartItemDetailResponse);
 
     // Remove an item from the cart
     rpc RemoveCartItem(RemoveCartItemRequest) returns (RemoveCartItemResponse);
@@ -43,13 +46,17 @@ message AddToCartRequest {
     int32 quantity = 3;
 }
 
-message AddToCartResponse {
+message ApplyCartItemPromoRequest {
+    string cart_item_hash = 1;
+    string promo_hash = 2;
+}
+
+message GetCartItemDetailResponse {
     CartItem cart_item = 1;
 }
 
 message RemoveCartItemRequest {
-    string cart_hash = 1;
-    string product_hash = 2;
+    string cart_item_hash = 1;
 }
 
 message RemoveCartItemResponse {
@@ -83,4 +90,5 @@ message CartItem {
     int32 bogo_quantity = 7;
     bool is_point_purchase = 8;
     int32 points_payable = 9;
+    string hash = 10;
 }

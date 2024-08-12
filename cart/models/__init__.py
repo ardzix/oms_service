@@ -36,6 +36,7 @@ class BuyXGetYPromo(models.Model):
         verbose_name_plural = _("Buy X Get Y Promos")
 
 class CartItem(models.Model):
+    hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
@@ -57,6 +58,7 @@ class CartItem(models.Model):
 
         if self.promo_hash:
             promo_response = promo_client.get_promo_by_hash(self.promo_hash)
+            print("Hereeee: ", promo_response)
 
             if promo_response and promo_response.active:
                 # Handle discount promo
@@ -86,7 +88,6 @@ class CartItem(models.Model):
                 self.modified_price = self.price
 
         product_promo_response = promo_client.get_product_promos(self.product.product_hash)
-        print(product_promo_response)
         if product_promo_response:
             buy_x_get_y_promos_list = [MessageToDict(promo) for promo in product_promo_response.buy_x_get_y_promos]
             print(buy_x_get_y_promos_list)
