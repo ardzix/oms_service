@@ -17,11 +17,18 @@ COPY . .
 ENV DJANGO_SETTINGS_MODULE=oms.settings
 ENV PYTHONUNBUFFERED=1
 
-# Collect static files
-# RUN python manage.py collectstatic --noinput
+# Expose ports for gRPC and Django services
+EXPOSE 50057 50058 8001
 
-# Expose port for gRPC
-EXPOSE 50057 50058
+# Create an entrypoint script to run both the Django server and the gRPC service
+RUN echo '#!/bin/sh\n\
+python manage.py makemigrations && \
+python manage.py migrate && \
+uwsgi --http :8001 --module oms.wsgi:application --master --processes 4 --threads 2 & \
+python server.py' > /usr/src/app/entrypoint.sh
 
-# Run the command to start uWSGI
-CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python server.py"]
+# Make the entrypoint script executable
+RUN chmod +x /usr/src/app/entrypoint.sh
+
+# Set the entrypoint to run the script
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
