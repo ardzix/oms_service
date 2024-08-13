@@ -55,7 +55,7 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
         serializer = CartSerializer(cart)
         cart_items_response = [
             cart_pb2.CartItem(
-                product_hash=item['product'].product_hash,
+                product_hash=item.get('product').get('product_hash'),
                 quantity=item['quantity'],
                 price=float(item['price']),
                 promo_hash=item['promo_hash'],

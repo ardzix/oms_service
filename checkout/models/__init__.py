@@ -18,7 +18,7 @@ class Checkout(models.Model):
         masterdata_client = CatalogueClient()
         promo_client = PromoClient()
 
-        cart_items = self.cart.cartitem_set.all()
+        cart_items = self.cart.cart_items.all()
         subtotal = float(sum(item.price * item.quantity for item in cart_items))
         self.total_price = subtotal
 
