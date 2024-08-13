@@ -18,7 +18,7 @@ ENV DJANGO_SETTINGS_MODULE=oms.settings
 ENV PYTHONUNBUFFERED=1
 
 # Expose ports for gRPC and Django services
-EXPOSE 50057 50058 8001
+EXPOSE 50057 50058 50059 8001
 
 # Create an entrypoint script to run both the Django server and the gRPC service
 RUN echo '#!/bin/sh\n\
