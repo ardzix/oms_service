@@ -5,6 +5,7 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from cart.views import CartViewSet
+from django.conf import settings
 
 # Router for the REST API
 router = DefaultRouter()
@@ -22,6 +23,7 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
+    url=settings.BASE_URL,
 )
 
 urlpatterns = [

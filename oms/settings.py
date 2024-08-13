@@ -38,6 +38,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS = ["*"]
 
+
+BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
+
 # Application definition
 
 INSTALLED_APPS = [
