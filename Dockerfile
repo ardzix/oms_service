@@ -38,7 +38,7 @@ EXPOSE 50057 50058 50059 8001
 RUN echo '#!/bin/sh\n\
 python manage.py makemigrations && \
 python manage.py migrate && \
-uwsgi --http :8001 --module oms.wsgi:application --master --processes 4 --threads 2 & \
+uwsgi --http :8001 --module oms.wsgi:application --static-map /static=/usr/src/app/static --master --processes 4 --threads 2 & \
 python server.py' > /usr/src/app/entrypoint.sh
 
 # Make the entrypoint script executable
