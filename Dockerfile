@@ -24,7 +24,7 @@ COPY . .
 
 
 # Collect static files
-RUM mkdir static
+RUN mkdir static
 RUN python manage.py collectstatic --noinput
 
 # Set environment variables
