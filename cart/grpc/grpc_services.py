@@ -1,9 +1,12 @@
 import grpc
 import logging
-from django.utils.timezone import now
+from rest_framework.exceptions import ValidationError
 from cart.models import Cart, CartItem
 from channel.models import Brand, Product
 from services.channel.channel_client import ChannelClient
+from ..serializers import CartSerializer, CartItemSerializer
+from ..libs.cart import CartLib
+from ..libs.cart_item import CartItemLib
 from . import cart_pb2, cart_pb2_grpc
 
 # Configure logging
@@ -14,26 +17,22 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
 
     def GetOrCreateCart(self, request, context):
         logger.info(f"Received GetOrCreateCart request with user_hash: {request.user_hash} and brand_hash: {request.brand_hash}")
-        channel_client = ChannelClient()
-        brand_response = channel_client.get_brand(request.brand_hash)
-        if not brand_response:
+
+        # Validate and create/get the cart
+        brand = Brand.objects.filter(hash=request.brand_hash).first()
+        if not brand:
             context.abort(grpc.StatusCode.NOT_FOUND, "Brand not found")
 
-        brand, created = Brand.objects.get_or_create(
-            hash=request.brand_hash,
-            defaults={
-                "name": brand_response.name,
-                "description": brand_response.description,
-                "is_active": brand_response.is_active
-            },
-        )
+        serializer = CartSerializer(data={
+            'user_hash': request.user_hash,
+            'brand': brand.id,
+        })
 
-        cart, created = Cart.objects.get_or_create(
-            user_hash=request.user_hash,
-            brand=brand,
-            is_active=True
-        )
-        
+        if serializer.is_valid():
+            cart = serializer.save()
+        else:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(serializer.errors))
+
         cart_response = cart_pb2.Cart(
             hash=str(cart.hash),
             user_hash=cart.user_hash,
@@ -42,31 +41,32 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
             created_at=str(cart.created_at),
             updated_at=str(cart.updated_at)
         )
+
         logger.info(f"Returning Cart with hash: {cart.hash}")
         return cart_pb2.GetOrCreateCartResponse(cart=cart_response)
 
     def GetCartDetail(self, request, context):
         logger.info(f"Received GetCartDetail request with cart_hash: {request.cart_hash}")
         try:
-            cart = Cart.objects.get(hash=request.cart_hash)
-        except Cart.DoesNotExist:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Cart not found")
+            cart = CartLib.get_cart_detail(request.cart_hash)
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
-        cart_items = CartItem.objects.filter(cart=cart)
+        serializer = CartSerializer(cart)
         cart_items_response = [
             cart_pb2.CartItem(
-                product_hash=item.product.product_hash,
-                quantity=item.quantity,
-                price=float(item.price),
-                promo_hash=item.promo_hash,
-                modified_price=float(item.modified_price),
-                is_bogo=item.is_bogo,
-                bogo_quantity=item.bogo_quantity,
-                is_point_purchase=item.is_point_purchase,
-                points_payable=item.points_payable
+                product_hash=item['product'].product_hash,
+                quantity=item['quantity'],
+                price=float(item['price']),
+                promo_hash=item['promo_hash'],
+                modified_price=float(item['modified_price']),
+                is_bogo=item['is_bogo'],
+                bogo_quantity=item['bogo_quantity'],
+                is_point_purchase=item['is_point_purchase'],
+                points_payable=item['points_payable']
             )
-            for item in cart_items
-        ]
+            for item in serializer.data['cart_items']
+        ] if 'cart_items' in serializer.data else []
         
         cart_response = cart_pb2.Cart(
             hash=str(cart.hash),
@@ -82,6 +82,8 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
 
     def AddToCart(self, request, context):
         logger.info(f"Received AddToCart request for cart_hash: {request.cart_hash}, product_hash: {request.product_hash}, quantity: {request.quantity}")
+
+        # Get cart and product
         try:
             cart = Cart.objects.get(hash=request.cart_hash)
         except Cart.DoesNotExist:
@@ -92,16 +94,18 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
         except Product.DoesNotExist:
             context.abort(grpc.StatusCode.NOT_FOUND, "Product not found")
 
-        cart_item, created = CartItem.objects.get_or_create(
-            cart=cart,
-            product=product,
-            defaults={'quantity': request.quantity, 'price': product.price}
-        )
+        # Validate and create/update cart item
+        serializer = CartItemSerializer(data={
+            'cart': cart.id,
+            'product': product.id,
+            'quantity': request.quantity,
+            'price': product.price,
+        })
 
-        if not created:
-            cart_item.quantity += request.quantity
-
-        cart_item.save()
+        if serializer.is_valid():
+            cart_item = serializer.save()
+        else:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(serializer.errors))
 
         cart_item_response = cart_pb2.CartItem(
             product_hash=cart_item.product.product_hash,
@@ -118,17 +122,21 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
 
         logger.info(f"Item added to cart with cart_hash: {request.cart_hash}")
         return cart_pb2.GetCartItemDetailResponse(cart_item=cart_item_response)
-    
+
     def ApplyCartItemPromo(self, request, context):
         logger.info(f"Received ApplyCartItemPromo request for cart_item_hash: {request.cart_item_hash}, promo_hash: {request.promo_hash}")
         try:
             cart_item = CartItem.objects.get(hash=request.cart_item_hash)
-            cart_item.promo_hash = request.promo_hash
-            cart_item.save()
         except CartItem.DoesNotExist:
             context.abort(grpc.StatusCode.NOT_FOUND, "Cart item not found")
-            return cart_pb2.RemoveCartItemResponse(success=False)
-        
+
+        # Validate and apply promo
+        serializer = CartItemSerializer(cart_item, data={'promo_hash': request.promo_hash}, partial=True)
+        if serializer.is_valid():
+            cart_item = serializer.save()
+        else:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(serializer.errors))
+
         cart_item_response = cart_pb2.CartItem(
             product_hash=cart_item.product.product_hash,
             quantity=cart_item.quantity,
@@ -148,13 +156,11 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
     def RemoveCartItem(self, request, context):
         logger.info(f"Received RemoveCartItem request for cart_item_hash: {request.cart_item_hash}")
         try:
-            cart_item = CartItem.objects.get(hasattr=request.cart_item_hash)
-            cart_item.delete()
-            logger.info(f"Removed item {request.cart_item_hash} from cart {request.cart_hash}")
+            CartItemLib.remove_cart_item(request.cart_item_hash)
+            logger.info(f"Removed item {request.cart_item_hash} from cart")
             return cart_pb2.RemoveCartItemResponse(success=True)
-        except CartItem.DoesNotExist:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Cart item not found")
-            return cart_pb2.RemoveCartItemResponse(success=False)
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
     def ClearCart(self, request, context):
         logger.info(f"Received ClearCart request for cart_hash: {request.cart_hash}")
@@ -163,6 +169,6 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
         except Cart.DoesNotExist:
             context.abort(grpc.StatusCode.NOT_FOUND, "Cart not found")
 
-        CartItem.objects.filter(cart=cart).delete()
+        CartLib.clear_cart(cart)
         logger.info(f"Cleared all items from cart {request.cart_hash}")
         return cart_pb2.ClearCartResponse(success=True)

@@ -58,6 +58,10 @@ class Product(models.Model):
     def __str__(self):
         name = f"Variant {self.variant_hash}" if self.variant_hash else f"Product {self.product_hash}"
         return f"{name} on channel {self.channel.name} (event: {self.event})"
+    
+    def get_product_hash(self):
+        product_hash = self.product_hash if self.product_hash else self.parent.get_product_hash()
+        return product_hash
 
     class Meta:
         verbose_name = _("Product")

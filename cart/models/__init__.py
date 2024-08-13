@@ -37,7 +37,7 @@ class BuyXGetYPromo(models.Model):
 
 class CartItem(models.Model):
     hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -58,7 +58,6 @@ class CartItem(models.Model):
 
         if self.promo_hash:
             promo_response = promo_client.get_promo_by_hash(self.promo_hash)
-            print("Hereeee: ", promo_response)
 
             if promo_response and promo_response.active:
                 # Handle discount promo
@@ -90,7 +89,6 @@ class CartItem(models.Model):
         product_promo_response = promo_client.get_product_promos(self.product.product_hash)
         if product_promo_response:
             buy_x_get_y_promos_list = [MessageToDict(promo) for promo in product_promo_response.buy_x_get_y_promos]
-            print(buy_x_get_y_promos_list)
             for buy_x_get_y in buy_x_get_y_promos_list:
                 BuyXGetYPromo.objects.create(
                     promo_hash=buy_x_get_y.get('promoHash'),
