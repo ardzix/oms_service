@@ -89,6 +89,31 @@ class CatalogueServiceStub(object):
                 request_serializer=catalogue__pb2.Empty.SerializeToString,
                 response_deserializer=catalogue__pb2.ListCategoriesResponse.FromString,
                 _registered_method=True)
+        self.GetProductVariant = channel.unary_unary(
+                '/catalogue.CatalogueService/GetProductVariant',
+                request_serializer=catalogue__pb2.GetProductVariantRequest.SerializeToString,
+                response_deserializer=catalogue__pb2.ProductVariantResponse.FromString,
+                _registered_method=True)
+        self.CreateProductVariant = channel.unary_unary(
+                '/catalogue.CatalogueService/CreateProductVariant',
+                request_serializer=catalogue__pb2.CreateProductVariantRequest.SerializeToString,
+                response_deserializer=catalogue__pb2.ProductVariantResponse.FromString,
+                _registered_method=True)
+        self.UpdateProductVariant = channel.unary_unary(
+                '/catalogue.CatalogueService/UpdateProductVariant',
+                request_serializer=catalogue__pb2.UpdateProductVariantRequest.SerializeToString,
+                response_deserializer=catalogue__pb2.ProductVariantResponse.FromString,
+                _registered_method=True)
+        self.DeleteProductVariant = channel.unary_unary(
+                '/catalogue.CatalogueService/DeleteProductVariant',
+                request_serializer=catalogue__pb2.DeleteProductVariantRequest.SerializeToString,
+                response_deserializer=catalogue__pb2.Empty.FromString,
+                _registered_method=True)
+        self.ListProductVariants = channel.unary_unary(
+                '/catalogue.CatalogueService/ListProductVariants',
+                request_serializer=catalogue__pb2.ListProductVariantsRequest.SerializeToString,
+                response_deserializer=catalogue__pb2.ListProductVariantsResponse.FromString,
+                _registered_method=True)
 
 
 class CatalogueServiceServicer(object):
@@ -155,6 +180,37 @@ class CatalogueServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetProductVariant(self, request, context):
+        """Product Variant CRUD operations
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateProductVariant(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateProductVariant(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteProductVariant(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListProductVariants(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_CatalogueServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -207,6 +263,31 @@ def add_CatalogueServiceServicer_to_server(servicer, server):
                     servicer.ListCategories,
                     request_deserializer=catalogue__pb2.Empty.FromString,
                     response_serializer=catalogue__pb2.ListCategoriesResponse.SerializeToString,
+            ),
+            'GetProductVariant': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetProductVariant,
+                    request_deserializer=catalogue__pb2.GetProductVariantRequest.FromString,
+                    response_serializer=catalogue__pb2.ProductVariantResponse.SerializeToString,
+            ),
+            'CreateProductVariant': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateProductVariant,
+                    request_deserializer=catalogue__pb2.CreateProductVariantRequest.FromString,
+                    response_serializer=catalogue__pb2.ProductVariantResponse.SerializeToString,
+            ),
+            'UpdateProductVariant': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateProductVariant,
+                    request_deserializer=catalogue__pb2.UpdateProductVariantRequest.FromString,
+                    response_serializer=catalogue__pb2.ProductVariantResponse.SerializeToString,
+            ),
+            'DeleteProductVariant': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteProductVariant,
+                    request_deserializer=catalogue__pb2.DeleteProductVariantRequest.FromString,
+                    response_serializer=catalogue__pb2.Empty.SerializeToString,
+            ),
+            'ListProductVariants': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListProductVariants,
+                    request_deserializer=catalogue__pb2.ListProductVariantsRequest.FromString,
+                    response_serializer=catalogue__pb2.ListProductVariantsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -479,6 +560,141 @@ class CatalogueService(object):
             '/catalogue.CatalogueService/ListCategories',
             catalogue__pb2.Empty.SerializeToString,
             catalogue__pb2.ListCategoriesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetProductVariant(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/catalogue.CatalogueService/GetProductVariant',
+            catalogue__pb2.GetProductVariantRequest.SerializeToString,
+            catalogue__pb2.ProductVariantResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateProductVariant(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/catalogue.CatalogueService/CreateProductVariant',
+            catalogue__pb2.CreateProductVariantRequest.SerializeToString,
+            catalogue__pb2.ProductVariantResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateProductVariant(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/catalogue.CatalogueService/UpdateProductVariant',
+            catalogue__pb2.UpdateProductVariantRequest.SerializeToString,
+            catalogue__pb2.ProductVariantResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteProductVariant(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/catalogue.CatalogueService/DeleteProductVariant',
+            catalogue__pb2.DeleteProductVariantRequest.SerializeToString,
+            catalogue__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListProductVariants(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/catalogue.CatalogueService/ListProductVariants',
+            catalogue__pb2.ListProductVariantsRequest.SerializeToString,
+            catalogue__pb2.ListProductVariantsResponse.FromString,
             options,
             channel_credentials,
             insecure,

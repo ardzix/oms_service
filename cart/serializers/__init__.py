@@ -18,14 +18,22 @@ class CartItemSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         catalogue = CatalogueClient()
         product_hash = instance.product.get_product_hash()
+        
         product_response = catalogue.get_product(product_hash)
         product_details = MessageToDict(product_response)
         if 'variants' in product_details:
             product_details.pop('variants')
+
+        variant_details = None
+        if instance.product.variant_hash:
+            variant_response = catalogue.get_product_variant(instance.product.variant_hash)
+            variant_details = MessageToDict(variant_response)
+
         representation['product'] = {
             'type': 'product' if instance.product.product_hash else 'variant',
             'hash': instance.product.product_hash if instance.product.product_hash else instance.product.variant_hash,
-            'product_details': product_details
+            'product_details': product_details,
+            'variant_details': variant_details
         }
         representation['cart'] = instance.cart.hash
         return representation
