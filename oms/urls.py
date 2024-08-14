@@ -28,7 +28,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path(f'{settings.URL_PREFIX}api/channel/', include(channel_router.urls)),
+    path(f'{settings.URL_PREFIX}api/channels/', include(channel_router.urls)),
     path(f'{settings.URL_PREFIX}admin/', admin.site.urls),
     path(f'{settings.URL_PREFIX}api/', include(router.urls)),  # Include the REST API routes
     path(f'{settings.URL_PREFIX}api-docs/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
