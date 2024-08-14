@@ -60,7 +60,10 @@ class CartItemSerializer(serializers.ModelSerializer):
         instance.quantity = validated_data.get('quantity', instance.quantity)
         instance.price = validated_data.get('price', instance.price)
         instance.promo_hash = validated_data.get('promo_hash', instance.promo_hash)
-        instance.save()
+        try:
+            instance.save()
+        except Exception as e:
+            raise ValidationError(str(e))
 
         return instance
 

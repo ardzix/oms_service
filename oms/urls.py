@@ -7,10 +7,13 @@ from drf_yasg import openapi
 from cart.views import CartViewSet
 from django.conf import settings
 from channel.router import router as channel_router
+from checkout.views import CheckoutViewSet
 
 # Router for the REST API
-router = DefaultRouter()
-router.register(r'carts', CartViewSet, basename='cart')
+cart_router = DefaultRouter()
+cart_router.register(r'carts', CartViewSet, basename='cart')
+checkout_router = DefaultRouter()
+checkout_router.register(r'checkouts', CheckoutViewSet, basename='checkout')
 
 # Swagger/OpenAPI configuration
 schema_view = get_schema_view(
@@ -29,8 +32,9 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path(f'{settings.URL_PREFIX}api/channels/', include(channel_router.urls)),
+    path(f'{settings.URL_PREFIX}api/', include(checkout_router.urls)),
+    path(f'{settings.URL_PREFIX}api/', include(cart_router.urls)),
     path(f'{settings.URL_PREFIX}admin/', admin.site.urls),
-    path(f'{settings.URL_PREFIX}api/', include(router.urls)),  # Include the REST API routes
     path(f'{settings.URL_PREFIX}api-docs/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path(
         f"{settings.URL_PREFIX}swagger/",

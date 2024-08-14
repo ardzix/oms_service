@@ -8,11 +8,15 @@ class Checkout(models.Model):
     user_hash = models.CharField(max_length=255)
     hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
     cart = models.ForeignKey('cart.Cart', on_delete=models.CASCADE)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-    vat = models.DecimalField(max_digits=10, decimal_places=2)
-    final_price = models.DecimalField(max_digits=10, decimal_places=2)
+    vat = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    final_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def invoice(self):
+        return Invoice.objects.filter(checkout=self).first()
 
     def save(self, *args, **kwargs):
         masterdata_client = CatalogueClient()
@@ -51,7 +55,7 @@ class Invoice(models.Model):
     PENDING = 'pending'
     PAID = 'paid'
     STATUS_CHOICES=[(PENDING, _('Pending')), (PAID, _('Paid'))]
-    checkout = models.OneToOneField(Checkout, on_delete=models.CASCADE)
+    checkout = models.OneToOneField(Checkout, on_delete=models.CASCADE, related_name="invoice")
     invoice_number = models.CharField(max_length=100)
     status = models.CharField(max_length=50, default=PENDING, choices=STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)

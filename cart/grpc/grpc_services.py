@@ -3,7 +3,6 @@ import logging
 from rest_framework.exceptions import ValidationError
 from cart.models import Cart, CartItem
 from channel.models import Brand, Product
-from services.channel.channel_client import ChannelClient
 from ..serializers import CartSerializer, CartItemSerializer
 from ..libs.cart import CartLib
 from ..libs.cart_item import CartItemLib
