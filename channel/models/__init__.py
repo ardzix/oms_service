@@ -45,6 +45,7 @@ class Event(models.Model):
         verbose_name_plural = _("Events")
 
 class Product(models.Model):
+    hash = models.UUIDField(default=uuid.uuid4, editable=True, unique=True)
     parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
     product_hash = models.CharField(max_length=255, blank=True, null=True)
     variant_hash = models.CharField(max_length=255, blank=True, null=True)

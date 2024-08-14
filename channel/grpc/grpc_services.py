@@ -1,8 +1,17 @@
 import grpc
-from concurrent import futures
 import logging
-from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.exceptions import ValidationError
 from channel.models import Brand, Channel, Event, Product
+from ..serializers.brand import BrandSerializer
+from ..serializers.channel import ChannelSerializer
+from ..serializers.event import EventSerializer
+from ..serializers.product import ProductSerializer
+from ..serializers.product_variant import ProductVariantSerializer
+from ..libs.brand import BrandLib
+from ..libs.channel import ChannelLib
+from ..libs.event import EventLib
+from ..libs.product import ProductLib
+from ..libs.product_variant import ProductVariantLib
 from . import oms_channel_pb2, oms_channel_pb2_grpc
 
 # Configure logging
@@ -11,268 +20,290 @@ logger = logging.getLogger(__name__)
 
 class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
 
-    # List all brands
     def ListBrands(self, request, context):
         logger.info("Received ListBrands request")
-        brands = Brand.objects.all()
+        brands = BrandLib.list_brands()
+        serializer = BrandSerializer(brands, many=True)
         response = oms_channel_pb2.ListBrandsResponse()
-        for brand in brands:
-            response.brands.add(
-                hash=str(brand.hash),
-                name=brand.name,
-                description=brand.description,
-                is_active=brand.is_active
+        
+        for brand_data in serializer.data:
+            brand_message = oms_channel_pb2.Brand(
+                hash=brand_data['hash'],
+                name=brand_data['name'],
+                description=brand_data['description'],
+                is_active=brand_data['is_active']
             )
+            response.brands.append(brand_message)
+        
         return response
 
-    # List all channels
     def ListChannels(self, request, context):
         logger.info("Received ListChannels request")
-        channels = Channel.objects.all()
+        channels = ChannelLib.list_channels()
+        serializer = ChannelSerializer(channels, many=True)
         response = oms_channel_pb2.ListChannelsResponse()
-        for channel in channels:
-            response.channels.add(
-                hash=str(channel.hash),
-                name=channel.name,
-                description=channel.description,
-                brand_hash=str(channel.brand.hash)
+        
+        for channel_data in serializer.data:
+            channel_message = oms_channel_pb2.Channel(
+                hash=channel_data['hash'],
+                name=channel_data['name'],
+                description=channel_data['description'],
+                brand_hash=str(channel_data['brand'])  # Ensure the brand_hash is a string
             )
+            response.channels.append(channel_message)
+        
         return response
 
-    # List all events
     def ListEvents(self, request, context):
         logger.info("Received ListEvents request")
-        events = Event.objects.all()
+        events = EventLib.list_events()
+        serializer = EventSerializer(events, many=True)
         response = oms_channel_pb2.ListEventsResponse()
-        for event in events:
-            response.events.add(
-                hash=str(event.hash),
-                name=event.name,
-                description=event.description,
-                start_date=str(event.start_date),
-                end_date=str(event.end_date),
-                channel_hash=str(event.channel.hash),
-                brand_hash=str(event.brand.hash)
+        
+        for event_data in serializer.data:
+            event_message = oms_channel_pb2.Event(
+                hash=event_data['hash'],
+                name=event_data['name'],
+                description=event_data['description'],
+                start_date=event_data['start_date'],
+                end_date=event_data['end_date'],
+                channel_hash=str(event_data['channel']),
+                brand_hash=str(event_data['brand'])
             )
+            response.events.append(event_message)
+        
         return response
 
-    # Get a product by hash
     def GetProduct(self, request, context):
-        logger.info(f"Received GetProduct request for product_hash: {request.product_hash}")
+        logger.info(f"Received GetProduct request for hash: {request.hash}")
         try:
-            product = Product.objects.get(product_hash=request.product_hash)
+            product = ProductLib.get_product_by_hash(request.hash)
+            serializer = ProductSerializer(product)
+            product_data = serializer.data
             return oms_channel_pb2.ProductResponse(
-                product_hash=str(product.product_hash),
-                channel_hash=str(product.channel.hash),
-                event_hash=str(product.event.hash) if product.event else "",
-                brand_hash=str(product.brand.hash),
-                available=product.available,
-                price=float(product.price),
-                is_valid=product.is_valid
+                hash=product_data['hash'],
+                product_hash=product_data['product_hash'],
+                channel_hash=str(product_data['channel']),
+                event_hash=str(product_data['event']) if product_data['event'] else "",
+                brand_hash=str(product_data['brand']),
+                available=product_data['available'],
+                price=float(product_data['price']),
+                is_valid=product_data['is_valid']
             )
-        except Product.DoesNotExist:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Product not found")
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
         except Exception as e:
             context.abort(grpc.StatusCode.ABORTED, str(e))
 
-    # Create a new product
     def CreateProduct(self, request, context):
         logger.info(f"Received CreateProduct request for product_hash: {request.product_hash}")
-        try:
-            channel = Channel.objects.get(hash=request.channel_hash)
-            brand = Brand.objects.get(hash=request.brand_hash)
-            event = Event.objects.get(hash=request.event_hash) if request.event_hash else None
+        serializer = ProductSerializer(data={
+            'product_hash': request.product_hash,
+            'channel': Channel.objects.get(hash=request.channel_hash).pk if request.channel_hash else None,
+            'event': Event.objects.get(hash=request.event_hash).pk if request.event_hash else None,
+            'brand': Brand.objects.get(hash=request.brand_hash).pk if request.brand_hash else None,
+            'available': request.available,
+            'price': request.price,
+            'is_valid': request.is_valid,
+        })
 
-            product = Product.objects.create(
-                product_hash=request.product_hash,
-                channel=channel,
-                event=event,
-                brand=brand,
-                available=request.available,
-                price=request.price,
-                is_valid=request.is_valid
-            )
+        if serializer.is_valid():
+            product = serializer.save()
             return oms_channel_pb2.ProductResponse(
-                product_hash=str(product.product_hash),
+                product_hash=product.product_hash,
                 channel_hash=str(product.channel.hash),
                 event_hash=str(product.event.hash) if product.event else "",
                 brand_hash=str(product.brand.hash),
                 available=product.available,
                 price=float(product.price),
-                is_valid=product.is_valid
+                is_valid=product.is_valid,
+                hash=str(product.hash)
             )
-        except (Channel.DoesNotExist, Brand.DoesNotExist, Event.DoesNotExist) as e:
-            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
+        else:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(serializer.errors))
 
-    # Update an existing product
     def UpdateProduct(self, request, context):
-        logger.info(f"Received UpdateProduct request for product_hash: {request.product_hash}")
+        logger.info(f"Received UpdateProduct request for hash: {request.hash}")
         try:
-            product = Product.objects.get(product_hash=request.product_hash)
-            product.channel = Channel.objects.get(hash=request.channel_hash)
-            product.brand = Brand.objects.get(hash=request.brand_hash)
-            product.event = Event.objects.get(hash=request.event_hash) if request.event_hash else None
-            product.available = request.available
-            product.price = request.price
-            product.is_valid = request.is_valid
-            product.save()
-            return oms_channel_pb2.ProductResponse(
-                product_hash=str(product.product_hash),
-                channel_hash=str(product.channel.hash),
-                event_hash=str(product.event.hash) if product.event else "",
-                brand_hash=str(product.brand.hash),
-                available=product.available,
-                price=float(product.price),
-                is_valid=product.is_valid
-            )
-        except (Product.DoesNotExist, Channel.DoesNotExist, Brand.DoesNotExist, Event.DoesNotExist) as e:
+            product = ProductLib.get_product_by_hash(request.hash)
+            serializer = ProductSerializer(product, data={
+                'channel': Channel.objects.get(hash=request.channel_hash).pk if request.channel_hash else None,
+                'event': Event.objects.get(hash=request.event_hash).pk if request.event_hash else None,
+                'brand': Brand.objects.get(hash=request.brand_hash).pk if request.brand_hash else None,
+                'available': request.available,
+                'price': request.price,
+                'is_valid': request.is_valid,
+                'hash': request.hash,
+            }, partial=True)
+
+            if serializer.is_valid():
+                product = serializer.save()
+                return oms_channel_pb2.ProductResponse(
+                    product_hash=product.product_hash,
+                    channel_hash=str(product.channel.hash),
+                    event_hash=str(product.event.hash) if product.event else "",
+                    brand_hash=str(product.brand.hash),
+                    available=product.available,
+                    price=float(product.price),
+                    is_valid=product.is_valid,
+                    hash=str(product.hash),
+                )
+            else:
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(serializer.errors))
+        except ValidationError as e:
             context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
-    # Delete a product
     def DeleteProduct(self, request, context):
-        logger.info(f"Received DeleteProduct request for product_hash: {request.product_hash}")
+        logger.info(f"Received DeleteProduct request for product_hash: {request.hash}")
         try:
-            product = Product.objects.get(product_hash=request.product_hash)
-            product.delete()
+            ProductLib.delete_product_by_hash(request.hash)
             return oms_channel_pb2.Empty()
-        except Product.DoesNotExist:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Product not found")
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
-
-    # List products by channel, event (optional), and brand (optional)
     def ListProducts(self, request, context):
         logger.info(f"Received ListProducts request for channel_hash: {request.channel_hash}, event_hash: {request.event_hash}, brand_hash: {request.brand_hash}")
-        
-        if not request.channel_hash and not request.brand_hash:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Channel and Brand hash is required to perform this action")
-
         try:
-            products = Product.objects.filter(channel__hash=request.channel_hash, brand__hash=request.brand_hash, parent__isnull=True)
-        except Exception as e:
-            context.abort(grpc.StatusCode.ABORTED, str(e))
-        
-        if request.event_hash and request.event_hash == 'all':
-            pass
-        elif request.event_hash and request.event_hash == 'global':
-            products = products.filter(event__hash__isnull=True)
-        elif request.event_hash:
-            products = products.filter(event__hash=request.event_hash)
-
-        response = oms_channel_pb2.ListProductsResponse()
-        for product in products:
-            response.products.add(
-                product_hash=str(product.product_hash),
-                channel_hash=str(product.channel.hash),
-                event_hash=str(product.event.hash) if product.event else "",
-                brand_hash=str(product.brand.hash),
-                available=product.available,
-                price=float(product.price),
-                is_valid=product.is_valid
+            products = ProductLib.list_products(
+                channel_hash=request.channel_hash, 
+                event_hash=request.event_hash, 
+                brand_hash=request.brand_hash
             )
-        return response
+            serializer = ProductSerializer(products, many=True)
+            response = oms_channel_pb2.ListProductsResponse()
 
+            for product_data in serializer.data:
+                product_message = oms_channel_pb2.ProductResponse(
+                    product_hash=product_data['product_hash'],
+                    channel_hash=str(product_data['channel']),
+                    event_hash=str(product_data['event']) if product_data['event'] else "",
+                    brand_hash=str(product_data['brand']),
+                    available=product_data['available'],
+                    price=float(product_data['price']),
+                    is_valid=product_data['is_valid'],
+                    hash=product_data['hash'],
+                )
+                response.products.append(product_message)
 
-    # Get a product variant by variant_hash
+            return response
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
+
     def GetProductVariant(self, request, context):
-        logger.info(f"Received GetProductVariant request for variant_hash: {request.variant_hash}")
+        logger.info(f"Received GetProductVariant request for hash: {request.hash}")
         try:
-            variant = Product.objects.get(variant_hash=request.variant_hash)
+            variant = ProductLib.get_product_by_hash(request.hash)
+            serializer = ProductVariantSerializer(variant)
+            variant_data = serializer.data
             return oms_channel_pb2.ProductVariantResponse(
-                parent_hash=str(variant.parent.product_hash) if variant.parent else "",
-                variant_hash=str(variant.variant_hash),
-                channel_hash=str(variant.channel.hash),
-                event_hash=str(variant.event.hash) if variant.event else "",
-                brand_hash=str(variant.brand.hash),
-                available=variant.available,
-                price=float(variant.price),
-                is_valid=variant.is_valid
+                parent_hash=str(variant_data['parent_hash']),
+                variant_hash=variant_data['variant_hash'],
+                channel_hash=str(variant_data['channel']),
+                event_hash=str(variant_data['event']),
+                brand_hash=str(variant_data['brand']),
+                available=variant_data['available'],
+                price=float(variant_data['price']),
+                is_valid=variant_data['is_valid'],
+                hash=variant_data['hash']
             )
-        except Product.DoesNotExist:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Product variant not found")
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
-    # Create a new product variant
     def CreateProductVariant(self, request, context):
         logger.info(f"Received CreateProductVariant request for variant_hash: {request.variant_hash}")
-        try:
-            parent = Product.objects.get(product_hash=request.parent_hash)
-            channel = Channel.objects.get(hash=request.channel_hash)
-            brand = Brand.objects.get(hash=request.brand_hash)
-            event = Event.objects.get(hash=request.event_hash) if request.event_hash else None
 
-            variant = Product.objects.create(
-                parent=parent,
-                product_hash=None,  # Product hash remains null for variants
-                variant_hash=request.variant_hash,
-                channel=channel,
-                event=event,
-                brand=brand,
-                available=request.available,
-                price=request.price,
-                is_valid=request.is_valid
-            )
+        try:
+            serializer = ProductVariantSerializer(data={
+                'parent': ProductLib.get_product_by_hash(request.parent_hash).pk,
+                'variant_hash': request.variant_hash,
+                'channel': Channel.objects.get(hash=request.channel_hash).pk if request.channel_hash else None,
+                'event': Event.objects.get(hash=request.event_hash).pk if request.event_hash else None,
+                'brand': Brand.objects.get(hash=request.brand_hash).pk if request.brand_hash else None,
+                'available': request.available,
+                'price': request.price,
+                'is_valid': request.is_valid,
+            })
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
+
+        if serializer.is_valid():
+            variant = serializer.save()
             return oms_channel_pb2.ProductVariantResponse(
-                parent_hash=str(variant.parent.product_hash),
-                variant_hash=str(variant.variant_hash),
+                parent_hash=str(variant.parent.product_hash) if variant.parent else "",
+                variant_hash=variant.variant_hash,
                 channel_hash=str(variant.channel.hash),
                 event_hash=str(variant.event.hash) if variant.event else "",
                 brand_hash=str(variant.brand.hash),
                 available=variant.available,
                 price=float(variant.price),
-                is_valid=variant.is_valid
+                is_valid=variant.is_valid,
+                hash=str(variant.hash)
             )
-        except (Product.DoesNotExist, Channel.DoesNotExist, Brand.DoesNotExist, Event.DoesNotExist) as e:
-            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
+        else:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(serializer.errors))
 
-    # Update an existing product variant
     def UpdateProductVariant(self, request, context):
-        logger.info(f"Received UpdateProductVariant request for variant_hash: {request.variant_hash}")
+        logger.info(f"Received UpdateProductVariant request for hash: {request.hash}")
         try:
-            variant = Product.objects.get(variant_hash=request.variant_hash)
-            variant.parent = Product.objects.get(product_hash=request.parent_hash)
-            variant.channel = Channel.objects.get(hash=request.channel_hash)
-            variant.brand = Brand.objects.get(hash=request.brand_hash)
-            variant.event = Event.objects.get(hash=request.event_hash) if request.event_hash else None
-            variant.available = request.available
-            variant.price = request.price
-            variant.is_valid = request.is_valid
-            variant.save()
-            return oms_channel_pb2.ProductVariantResponse(
-                parent_hash=str(variant.parent.product_hash),
-                variant_hash=str(variant.variant_hash),
-                channel_hash=str(variant.channel.hash),
-                event_hash=str(variant.event.hash) if variant.event else "",
-                brand_hash=str(variant.brand.hash),
-                available=variant.available,
-                price=float(variant.price),
-                is_valid=variant.is_valid
-            )
-        except (Product.DoesNotExist, Channel.DoesNotExist, Brand.DoesNotExist, Event.DoesNotExist) as e:
+            variant = ProductLib.get_product_by_hash(request.hash)
+            serializer = ProductVariantSerializer(variant, data={
+                'parent': ProductLib.get_product_by_hash(request.parent_hash).pk,
+                'channel': Channel.objects.get(hash=request.channel_hash).pk if request.channel_hash else None,
+                'event': Event.objects.get(hash=request.event_hash).pk if request.event_hash else None,
+                'brand': Brand.objects.get(hash=request.brand_hash).pk if request.brand_hash else None,
+                'available': request.available,
+                'price': request.price,
+                'is_valid': request.is_valid,
+                'hash': request.hash,
+            }, partial=True)
+
+            if serializer.is_valid():
+                variant = serializer.save()
+                return oms_channel_pb2.ProductVariantResponse(
+                    parent_hash=str(variant.parent.product_hash) if variant.parent else "",
+                    variant_hash=variant.variant_hash,
+                    channel_hash=str(variant.channel.hash),
+                    event_hash=str(variant.event.hash) if variant.event else "",
+                    brand_hash=str(variant.brand.hash),
+                    available=variant.available,
+                    price=float(variant.price),
+                    is_valid=variant.is_valid,
+                    hash=str(variant.hash)
+                )
+            else:
+                context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(serializer.errors))
+        except ValidationError as e:
             context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
-    # Delete a product variant
     def DeleteProductVariant(self, request, context):
-        logger.info(f"Received DeleteProductVariant request for variant_hash: {request.variant_hash}")
+        logger.info(f"Received DeleteProductVariant request for hash: {request.hash}")
         try:
-            variant = Product.objects.get(variant_hash=request.variant_hash)
-            variant.delete()
+            ProductLib.delete_product_by_hash(request.hash)
             return oms_channel_pb2.Empty()
-        except Product.DoesNotExist:
-            context.abort(grpc.StatusCode.NOT_FOUND, "Product variant not found")
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))
 
-    # List product variants by parent hash
     def ListProductVariants(self, request, context):
         logger.info(f"Received ListProductVariants request for parent_hash: {request.parent_hash}")
-        variants = Product.objects.filter(parent__product_hash=request.parent_hash)
-        response = oms_channel_pb2.ListProductVariantsResponse()
-        for variant in variants:
-            response.variants.add(
-                parent_hash=str(variant.parent.product_hash) if variant.parent else "",
-                variant_hash=str(variant.variant_hash),
-                channel_hash=str(variant.channel.hash),
-                event_hash=str(variant.event.hash) if variant.event else "",
-                brand_hash=str(variant.brand.hash),
-                available=variant.available,
-                price=float(variant.price),
-                is_valid=variant.is_valid
-            )
-        return response
+        try:
+            variants = ProductVariantLib.list_variants_by_parent_hash(request.parent_hash)
+            serializer = ProductVariantSerializer(variants, many=True)
+            response = oms_channel_pb2.ListProductVariantsResponse()
+
+            for variant_data in serializer.data:
+                variant_message = oms_channel_pb2.ProductVariantResponse(
+                    parent_hash=str(variant_data['parent']) if variant_data['parent'] else "",
+                    variant_hash=variant_data['variant_hash'],
+                    channel_hash=str(variant_data['channel']),
+                    event_hash=str(variant_data['event']) if variant_data['event'] else "",
+                    brand_hash=str(variant_data['brand']),
+                    available=variant_data['available'],
+                    price=float(variant_data['price']),
+                    is_valid=variant_data['is_valid'],
+                    hash=variant_data['hash'],
+                )
+                response.variants.append(variant_message)
+
+            return response
+        except ValidationError as e:
+            context.abort(grpc.StatusCode.NOT_FOUND, str(e))

@@ -37,7 +37,8 @@ def print_product(product):
     print(f"Brand Hash: {product.brand_hash}")
     print(f"Available: {product.available}")
     print(f"Price: {product.price}")
-    print(f"Is Valid: {product.is_valid}\n")
+    print(f"Is Valid: {product.is_valid}")
+    print(f"Hash: {product.hash}\n")
 
 def print_product_variant(variant):
     print(f"Parent Hash: {variant.parent_hash}")
@@ -47,7 +48,8 @@ def print_product_variant(variant):
     print(f"Brand Hash: {variant.brand_hash}")
     print(f"Available: {variant.available}")
     print(f"Price: {variant.price}")
-    print(f"Is Valid: {variant.is_valid}\n")
+    print(f"Is Valid: {variant.is_valid}")
+    print(f"Hash: {variant.hash}\n")
 
 def run():
     with grpc.insecure_channel(f'{settings.OMS_CHANNEL_SERVICE_HOST}:{settings.OMS_CHANNEL_SERVICE_PORT}') as channel:
@@ -73,7 +75,7 @@ def run():
 
         # Create a product
         create_product_request = oms_channel_pb2.CreateProductRequest(
-            product_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3",
+            product_hash="e5712557-2a37-481e-bf69-679c708a7398",
             channel_hash="fbb7d89c-be1a-47ac-bf2d-7ecce29295ab",
             event_hash=None,  # Optional
             brand_hash="3e98fa28-0daf-488f-abb5-a280449a6f65",
@@ -86,27 +88,28 @@ def run():
         print_product(product_response)
 
         # Get the created product
-        get_product_request = oms_channel_pb2.GetProductRequest(product_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3")
+        get_product_request = oms_channel_pb2.GetProductRequest(hash=product_response.hash)
         product_response = stub.GetProduct(get_product_request)
         print("Retrieved Product:")
         print_product(product_response)
 
         # Update the product
         update_product_request = oms_channel_pb2.UpdateProductRequest(
-            product_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3",
+            product_hash="e5712557-2a37-481e-bf69-679c708a7398",
             channel_hash="fbb7d89c-be1a-47ac-bf2d-7ecce29295ab",
             event_hash=None,  # Optional
             brand_hash="3e98fa28-0daf-488f-abb5-a280449a6f65",
             available=False,  # Updating availability
             price=149.99,  # Updating price
-            is_valid=True
+            is_valid=True,
+            hash=product_response.hash
         )
         updated_product_response = stub.UpdateProduct(update_product_request)
         print("Updated Product:")
         print_product(updated_product_response)
 
         # List products by channel and event (if provided)
-        list_products_request = oms_channel_pb2.ListProductsRequest(channel_hash="fbb7d89c-be1a-47ac-bf2d-7ecce29295ab")
+        list_products_request = oms_channel_pb2.ListProductsRequest(brand_hash="3e98fa28-0daf-488f-abb5-a280449a6f65", channel_hash="fbb7d89c-be1a-47ac-bf2d-7ecce29295ab")
         products_response = stub.ListProducts(list_products_request)
         print("Listing Products:")
         for product in products_response.products:
@@ -114,8 +117,8 @@ def run():
 
         # Create a product variant
         create_variant_request = oms_channel_pb2.CreateProductVariantRequest(
-            parent_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3",
-            variant_hash="variant-123",
+            parent_hash=product_response.hash,
+            variant_hash="d8d9cce9-fbf4-42e3-9743-05407fca5e0e",
             channel_hash="fbb7d89c-be1a-47ac-bf2d-7ecce29295ab",
             event_hash=None,  # Optional
             brand_hash="3e98fa28-0daf-488f-abb5-a280449a6f65",
@@ -128,42 +131,43 @@ def run():
         print_product_variant(variant_response)
 
         # Get the created product variant
-        get_variant_request = oms_channel_pb2.GetProductVariantRequest(variant_hash="variant-123")
+        get_variant_request = oms_channel_pb2.GetProductVariantRequest(hash=variant_response.hash)
         variant_response = stub.GetProductVariant(get_variant_request)
         print("Retrieved Product Variant:")
         print_product_variant(variant_response)
 
         # Update the product variant
         update_variant_request = oms_channel_pb2.UpdateProductVariantRequest(
-            parent_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3",
-            variant_hash="variant-123",
+            parent_hash=product_response.hash,
+            variant_hash="d8d9cce9-fbf4-42e3-9743-05407fca5e0e",
             channel_hash="fbb7d89c-be1a-47ac-bf2d-7ecce29295ab",
             event_hash=None,  # Optional
             brand_hash="3e98fa28-0daf-488f-abb5-a280449a6f65",
             available=False,  # Updating availability
             price=129.99,  # Updating price
-            is_valid=True
+            is_valid=True,
+            hash=variant_response.hash
         )
         updated_variant_response = stub.UpdateProductVariant(update_variant_request)
         print("Updated Product Variant:")
         print_product_variant(updated_variant_response)
 
         # List product variants by parent hash
-        list_variants_request = oms_channel_pb2.ListProductVariantsRequest(parent_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3")
+        list_variants_request = oms_channel_pb2.ListProductVariantsRequest(parent_hash=product_response.hash)
         variants_response = stub.ListProductVariants(list_variants_request)
         print("Listing Product Variants:")
         for variant in variants_response.variants:
             print_product_variant(variant)
 
         # Delete the product variant
-        delete_variant_request = oms_channel_pb2.DeleteProductVariantRequest(variant_hash="variant-123")
+        delete_variant_request = oms_channel_pb2.DeleteProductVariantRequest(hash=variant_response.hash)
         stub.DeleteProductVariant(delete_variant_request)
-        print("Deleted Product Variant with hash: variant-123")
+        print(f"Deleted Product Variant with hash: {variant_response.hash}")
 
         # Delete the product
-        delete_product_request = oms_channel_pb2.DeleteProductRequest(product_hash="fbbd1a17-b3dc-4cab-bde3-d82716f53cd3")
+        delete_product_request = oms_channel_pb2.DeleteProductRequest(hash=product_response.hash)
         stub.DeleteProduct(delete_product_request)
-        print("Deleted Product with hash: e5712557-2a37-481e-bf69-679c708a7398")
+        print(f"Deleted Product with hash: {product_response.hash}")
 
 if __name__ == '__main__':
     run()
