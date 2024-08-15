@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "drf_yasg",
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -191,6 +192,15 @@ LOCALE_PATHS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Channels setup
+ASGI_APPLICATION = "oms.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
 # Get the host and port for the gRPC services
 MD_CATALOGUE_SERVICE_HOST = os.getenv('MD_CATALOGUE_SERVICE_HOST', 'localhost')
 MD_CATALOGUE_SERVICE_PORT = os.getenv('MD_CATALOGUE_SERVICE_PORT', '50051')
@@ -210,3 +220,7 @@ OMS_CHANNEL_SERVICE_HOST = os.getenv('OMS_CHANNEL_SERVICE_HOST', 'localhost')
 OMS_CHANNEL_SERVICE_PORT = os.getenv('OMS_CHANNEL_SERVICE_PORT', '50058')
 OMS_CHECKOUT_SERVICE_HOST = os.getenv('OMS_CHECKOUT_SERVICE_HOST', 'localhost')
 OMS_CHECKOUT_SERVICE_PORT = os.getenv('OMS_CHECKOUT_SERVICE_PORT', '50059')
+
+# Pulsar
+PULSAR_HOST = os.getenv('PULSAR_HOST', 'localhost')
+PULSAR_PORT = os.getenv('PULSAR_PORT', '6650x')
