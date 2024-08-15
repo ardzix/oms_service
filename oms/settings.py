@@ -223,4 +223,4 @@ OMS_CHECKOUT_SERVICE_PORT = os.getenv('OMS_CHECKOUT_SERVICE_PORT', '50059')
 
 # Pulsar
 PULSAR_HOST = os.getenv('PULSAR_HOST', 'localhost')
-PULSAR_PORT = os.getenv('PULSAR_PORT', '6650x')
+PULSAR_PORT = os.getenv('PULSAR_PORT', '6650')

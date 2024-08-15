@@ -22,7 +22,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .
 
-
 # Collect static files
 RUN mkdir static
 RUN python manage.py collectstatic --noinput
@@ -34,12 +33,13 @@ ENV PYTHONUNBUFFERED=1
 # Expose ports for gRPC and Django services
 EXPOSE 50057 50058 50059 8001
 
-# Create an entrypoint script to run both the Django server and the gRPC service
+# Create an entrypoint script to run the Django server, gRPC service, and Pulsar listener
 RUN echo '#!/bin/sh\n\
 python manage.py makemigrations && \
 python manage.py migrate && \
 uwsgi --http :8001 --module oms.wsgi:application --static-map /static=/usr/src/app/static --master --processes 4 --threads 2 & \
-python server.py' > /usr/src/app/entrypoint.sh
+python server.py & \
+python manage.py listen_pulsar' > /usr/src/app/entrypoint.sh
 
 # Make the entrypoint script executable
 RUN chmod +x /usr/src/app/entrypoint.sh
