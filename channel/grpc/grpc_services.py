@@ -292,7 +292,7 @@ class ChannelService(oms_channel_pb2_grpc.ChannelServiceServicer):
 
             for variant_data in serializer.data:
                 variant_message = oms_channel_pb2.ProductVariantResponse(
-                    parent_hash=str(variant_data['parent']) if variant_data['parent'] else "",
+                    parent_hash=str(variant_data['parent_hash']) if variant_data['parent_hash'] else "",
                     variant_hash=variant_data['variant_hash'],
                     channel_hash=str(variant_data['channel']),
                     event_hash=str(variant_data['event']) if variant_data['event'] else "",
