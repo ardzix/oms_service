@@ -50,6 +50,10 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.product} in cart {self.cart.id}"
+    
+    @property
+    def item_name(self):
+        return self.product.__str__()
 
     def save(self, *args, **kwargs):
         self.price = self.product.price  # Fetching base price from master data

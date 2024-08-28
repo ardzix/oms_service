@@ -20,7 +20,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
             "discount",
             "vat",
             "final_price",
-            "created_at",
+            "created_at"
         ]
         read_only_fields = ["hash", "created_at"]
 

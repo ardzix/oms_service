@@ -21,7 +21,8 @@ class CheckoutLib:
     def get_checkout_detail(checkout_hash):
         try:
             checkout = Checkout.objects.get(hash=checkout_hash)
-            return checkout
+            invoice = checkout.invoice
+            return checkout, invoice
         except Checkout.DoesNotExist:
             raise ValidationError("Checkout not found")
 
