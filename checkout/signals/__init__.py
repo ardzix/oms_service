@@ -2,6 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from ..models import Checkout, Invoice
 from django.utils.timezone import now
+from django_q.tasks import async_task
 
 @receiver(post_save, sender=Checkout)
 def invalidatate_cart(sender, instance, created, **kwargs):
@@ -35,3 +36,9 @@ def create_invoice(sender, instance, created, **kwargs):
             checkout=instance,
             invoice_number=invoice_number
         )
+
+
+@receiver(post_save, sender=Invoice)
+def send_invoice_to_payment_service(sender, instance, created, **kwargs):
+    if created:
+        async_task('checkout.tasks.send_invoice_to_payment_service_task', instance.id)

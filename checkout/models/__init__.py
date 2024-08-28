@@ -90,27 +90,6 @@ class Invoice(models.Model):
     def __str__(self):
         return self.invoice_number
 
-    def save(self, *args, **kwargs):
-        # Send final invoice to payment service
-        from services.payment.payment_client import PaymentClient
-
-        payment_client = PaymentClient()
-        items = [{"item_name": item.item_name, "quantity": item.quantity, "price": item.price} for item in self.checkout.cart_items]
-        payment_client.process_payment(
-            amount=self.checkout.final_price,
-            currency="IDR",
-            payment_method=self.payment_method,
-            qr_type="DYNAMIC",
-            user_id=self.checkout.user_hash,
-            phone_number='08581111111111',
-            ewallet_checkout_method='ONE_TIME_PAYMENT',
-            invoice_number=self.invoice_number,
-            agent='OMS',
-            qr_callback_url="https://femaledaily.net/payment_callback",
-            items=items
-        )
-        super().save(*args, **kwargs)
-
     class Meta:
         verbose_name = _("Invoice")
         verbose_name_plural = _("Invoices")

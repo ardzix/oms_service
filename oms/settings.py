@@ -56,10 +56,11 @@ INSTALLED_APPS = [
     'cart',
     'channel',
     'checkout',
-    "rest_framework",
-    "rest_framework.authtoken",
-    "drf_yasg",
+    'rest_framework',
+    'rest_framework.authtoken',
+    'drf_yasg',
     'channels',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -199,6 +200,18 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
+}
+
+
+# Django Q
+Q_CLUSTER = {
+    'name': 'DjangoORM',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 60,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default'  # Use the Django ORM as broker
 }
 
 # Get the host and port for the gRPC services

@@ -30,16 +30,17 @@ RUN python manage.py collectstatic --noinput
 ENV DJANGO_SETTINGS_MODULE=oms.settings
 ENV PYTHONUNBUFFERED=1
 
-# Expose ports for gRPC and Django services
+# Expose ports for gRPC, Django services, and any other services
 EXPOSE 50057 50058 50059 8001
 
-# Create an entrypoint script to run the Django server, gRPC service, and Pulsar listener
+# Create an entrypoint script to run the Django server, gRPC service, Pulsar listener, and Django-Q cluster
 RUN echo '#!/bin/sh\n\
 python manage.py makemigrations && \
 python manage.py migrate && \
 uwsgi --http :8001 --module oms.wsgi:application --static-map /static=/usr/src/app/static --master --processes 4 --threads 2 & \
 python server.py & \
-python manage.py listen_pulsar' > /usr/src/app/entrypoint.sh
+python manage.py listen_pulsar & \
+python manage.py qcluster' > /usr/src/app/entrypoint.sh
 
 # Make the entrypoint script executable
 RUN chmod +x /usr/src/app/entrypoint.sh
