@@ -54,7 +54,7 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
         serializer = CartSerializer(cart)
         cart_items_response = [
             cart_pb2.CartItem(
-                product_hash=item.get('product').get('product_hash'),
+                product_hash=item.get('product').get('hash'),
                 quantity=item['quantity'],
                 price=float(item['price']),
                 promo_hash=item['promo_hash'],
@@ -62,11 +62,12 @@ class CartService(cart_pb2_grpc.CartServiceServicer):
                 is_bogo=item['is_bogo'],
                 bogo_quantity=item['bogo_quantity'],
                 is_point_purchase=item['is_point_purchase'],
-                points_payable=item['points_payable']
+                points_payable=item['points_payable'],
+                hash=item['hash'],
             )
             for item in serializer.data['cart_items']
         ] if 'cart_items' in serializer.data else []
-        
+        print(cart_items_response)
         cart_response = cart_pb2.Cart(
             hash=str(cart.hash),
             user_hash=cart.user_hash,
