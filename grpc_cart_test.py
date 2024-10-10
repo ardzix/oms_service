@@ -1,126 +1,107 @@
 import grpc
 import os
 import django
+from datetime import datetime, timedelta
 
 # Configure Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'oms.settings')
 django.setup()
-
-from cart.grpc import cart_pb2, cart_pb2_grpc
-from checkout.grpc import checkout_pb2, checkout_pb2_grpc
 from django.conf import settings
 
-def print_cart(cart):
-    print(f"Cart Hash: {cart.hash}")
-    print(f"User Hash: {cart.user_hash}")
-    print(f"Brand Hash: {cart.brand_hash}")
-    print(f"Is Active: {cart.is_active}")
-    print(f"Created At: {cart.created_at}")
-    print(f"Updated At: {cart.updated_at}")
+from cart.grpc import cart_pb2, cart_pb2_grpc
 
-def print_cart_item(cart_item):
-    print(f"Product Hash: {cart_item.product_hash}")
-    print(f"Quantity: {cart_item.quantity}")
-    print(f"Price: {cart_item.price}")
-    print(f"Promo Hash: {cart_item.promo_hash}")
-    print(f"Modified Price: {cart_item.modified_price}")
-    print(f"Is BOGO: {cart_item.is_bogo}")
-    print(f"BOGO Quantity: {cart_item.bogo_quantity}")
-    print(f"Is Point Purchase: {cart_item.is_point_purchase}")
-    print(f"Points Payable: {cart_item.points_payable}")
+# gRPC client setup
+class CartClient:
+    def __init__(self, host, port):
+        self.channel = grpc.insecure_channel(f'{host}:{port}')
+        self.stub = cart_pb2_grpc.CartServiceStub(self.channel)
 
-def print_checkout(checkout):
-    print(f"Checkout Hash: {checkout.hash}")
-    print(f"User Hash: {checkout.user_hash}")
-    print(f"Cart Hash: {checkout.cart_hash}")
-    print(f"Total Price: {checkout.total_price}")
-    print(f"Discount: {checkout.discount}")
-    print(f"VAT: {checkout.vat}")
-    print(f"Final Price: {checkout.final_price}")
-    print(f"Created At: {checkout.created_at}")
+    def get_or_create_cart(self, user_hash, brand_hash):
+        request = cart_pb2.GetOrCreateCartRequest(user_hash=user_hash, brand_hash=brand_hash)
+        print(f"Sending GetOrCreateCart request: {request}")
+        response = self.stub.GetOrCreateCart(request)
+        print(f"Received GetOrCreateCart response: {response}")
+        return response.cart.hash
 
-def print_invoice(invoice):
-    print(f"Invoice Number: {invoice.invoice_number}")
-    print(f"Status: {invoice.status}")
-    print(f"Created At: {invoice.created_at}")
+    def get_cart_detail(self, cart_hash):
+        request = cart_pb2.GetCartDetailRequest(cart_hash=cart_hash)
+        print(f"Sending GetCartDetail request: {request}")
+        response = self.stub.GetCartDetail(request)
+        print(f"Received GetCartDetail response: {response}")
+        return response
 
-def run():
-    with grpc.insecure_channel(f'{settings.OMS_CART_SERVICE_HOST}:{settings.OMS_CART_SERVICE_PORT}') as cart_channel, \
-         grpc.insecure_channel(f'{settings.OMS_CHECKOUT_SERVICE_HOST}:{settings.OMS_CHECKOUT_SERVICE_PORT}') as checkout_channel:
-        
-        cart_stub = cart_pb2_grpc.CartServiceStub(cart_channel)
-        checkout_stub = checkout_pb2_grpc.CheckoutServiceStub(checkout_channel)
+    def add_to_cart(self, cart_hash, product_hash, quantity):
+        request = cart_pb2.AddToCartRequest(cart_hash=cart_hash, product_hash=product_hash, quantity=quantity)
+        print(f"Sending AddToCart request: {request}")
+        response = self.stub.AddToCart(request)
+        print(f"Received AddToCart response: {response}")
+        return response.cart_item.hash
 
-        # Get or create a cart by user_hash and brand_hash
-        get_or_create_cart_request = cart_pb2.GetOrCreateCartRequest(
-            user_hash="055f47c7-76bf-4c41-a89d-f8c9f01f6fd7",
-            brand_hash="3e98fa28-0daf-488f-abb5-a280449a6f65"
-        )
-        cart_response = cart_stub.GetOrCreateCart(get_or_create_cart_request)
-        print("Get or Create Cart Response:")
-        print_cart(cart_response.cart)
+    def apply_cart_item_promo(self, cart_item_hash, promo_hash):
+        request = cart_pb2.ApplyCartItemPromoRequest(cart_item_hash=cart_item_hash, promo_hash=promo_hash)
+        print(f"Sending ApplyCartItemPromo request: {request}")
+        response = self.stub.ApplyCartItemPromo(request)
+        print(f"Received ApplyCartItemPromo response: {response}")
 
-        # Add an item to the cart
-        add_to_cart_request = cart_pb2.AddToCartRequest(
-            cart_hash=cart_response.cart.hash,
-            product_hash="e5712557-2a37-481e-bf69-679c708a7398",
-            quantity=4
-        )
-        add_to_cart_response = cart_stub.AddToCart(add_to_cart_request)
-        print("\nAdded to Cart:")
-        print_cart_item(add_to_cart_response.cart_item)
+    def apply_cart_promo(self, cart_hash, promo_hash):
+        request = cart_pb2.ApplyCartPromoRequest(cart_hash=cart_hash, promo_hash=promo_hash)
+        print(f"Sending ApplyCartPromo request: {request}")
+        response = self.stub.ApplyCartPromo(request)
+        print(f"Received ApplyCartPromo response: {response}")
+
+    def remove_cart_item(self, cart_item_hash):
+        request = cart_pb2.RemoveCartItemRequest(cart_item_hash=cart_item_hash)
+        print(f"Sending RemoveCartItem request: {request}")
+        response = self.stub.RemoveCartItem(request)
+        print(f"Received RemoveCartItem response: {response}")
+
+    def clear_cart(self, cart_hash):
+        request = cart_pb2.ClearCartRequest(cart_hash=cart_hash)
+        print(f"Sending ClearCart request: {request}")
+        response = self.stub.ClearCart(request)
+        print(f"Received ClearCart response: {response}")
 
 
-        # Apply promo to item cart
-        apply_promo_request = cart_pb2.ApplyCartItemPromoRequest(
-            cart_item_hash=add_to_cart_response.cart_item.hash,
-            promo_hash="b2efe181-b650-4938-bd15-cefcad1d5b32",
-        )
-        add_to_cart_response = cart_stub.ApplyCartItemPromo(apply_promo_request)
-        print("\Promo applied to Cart:")
-        print_cart_item(add_to_cart_response.cart_item)
+# Test script
+def run_tests():
+    # Setup client
+    host = settings.OMS_CART_SERVICE_HOST
+    port = settings.OMS_CART_SERVICE_PORT
+    client = CartClient(host, port)
 
-        # Get cart details by cart hash
-        get_cart_detail_request = cart_pb2.GetCartDetailRequest(
-            cart_hash=cart_response.cart.hash
-        )
-        cart_detail_response = cart_stub.GetCartDetail(get_cart_detail_request)
-        print("\nCart Detail Response:")
-        print_cart(cart_detail_response.cart)
-        print("\nCart Items:")
-        for item in cart_detail_response.cart_items:
-            print_cart_item(item)
-            print("\n")
+    # Test GetOrCreateCart
+    user_hash = "3e98fa28-0daf-488f-abb5-a280449a6f65"
+    brand_hash = "3e98fa28-0daf-488f-abb5-a280449a6f65"
+    cart_hash = str(client.get_or_create_cart(user_hash, brand_hash))
 
-        # Create a checkout based on the cart
-        create_checkout_request = checkout_pb2.CreateCheckoutRequest(
-            cart_hash=cart_response.cart.hash,
-            user_hash="055f47c7-76bf-4c41-a89d-f8c9f01f6fd7"
-        )
-        checkout_response = checkout_stub.CreateCheckout(create_checkout_request)
-        print("\nCheckout Created:")
-        print_checkout(checkout_response)
+    # Add item to the cart
+    product_hash = "fbb7d89c-be1a-47ac-bf2d-7ecce29295ab"  # Example product hash, replace with actual
+    quantity = 2
+    cart_item_hash = client.add_to_cart(cart_hash, product_hash, quantity)
+    print("cart item hash: ", cart_item_hash)
 
-        # List all checkouts
-        list_checkout_request = checkout_pb2.ListCheckoutsRequest(
-            user_hash="055f47c7-76bf-4c41-a89d-f8c9f01f6fd7"
-        )
-        list_checkouts_response = checkout_stub.ListCheckouts(list_checkout_request)
-        print("\nList of Checkouts:")
-        for checkout in list_checkouts_response.checkouts:
-            print_checkout(checkout)
-            print("\n")
+    # Add item to the cart
+    product_hash2 = "fbb7d89c-be1a-47ac-bf2d-7ecce29295ac"  # Example product hash, replace with actual
+    quantity = 3
+    cart_item_hash2 = client.add_to_cart(cart_hash, product_hash2, quantity)
 
-        # Get checkout details including the last invoice
-        get_checkout_detail_request = checkout_pb2.GetCheckoutDetailRequest(
-            hash=checkout_response.hash
-        )
-        checkout_detail_response = checkout_stub.GetCheckoutDetail(get_checkout_detail_request)
-        print("\nCheckout Detail:")
-        print(checkout_detail_response.checkout)
-        # if checkout_detail_response.last_invoice and checkout_detail_response.last_invoice.invoice_number:
-        #     print("Last Invoice:")
-        #     print_invoice(checkout_detail_response.last_invoice)
+    # Get cart detail
+    client.get_cart_detail(cart_hash)
+
+    # Apply promo to cart item
+    promo_hash = "0c773d12-699a-4267-9e72-3251bb506872"  # Example promo hash, replace with actual
+    client.apply_cart_item_promo(cart_item_hash, promo_hash)
+
+    # Apply promo to cart
+    promo_hash = "73807f19-7c25-497a-8d4c-733835e0761d"  # Example promo hash, replace with actual
+    client.apply_cart_promo(cart_hash, promo_hash)
+
+    # # Remove cart item
+    # client.remove_cart_item(cart_item_hash)
+
+    # Clear cart
+    # client.clear_cart(cart_hash)
+
 
 if __name__ == '__main__':
-    run()
+    run_tests()

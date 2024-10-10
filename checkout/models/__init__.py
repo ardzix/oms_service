@@ -32,19 +32,15 @@ class Checkout(models.Model):
 
         # Apply promos
         for item in self.cart_items:
-            self.discount += float(item.price) - float(item.modified_price)
+            if item.modified_price:
+                self.discount += (float(item.price) - float(item.modified_price)) * float(item.quantity)
 
         discounted_subtotal = subtotal - self.discount
-
-        # Check threshold promos
-        threshold_promo_response = promo_client.check_threshold_promo(subtotal)
-        if threshold_promo_response.has_threshold_promo:
-            self.discount += threshold_promo_response.discount_value
 
         # Calculate VAT and final price
         vat_rate = masterdata_client.get_vat_rate()
         self.vat = discounted_subtotal * vat_rate
-        self.final_price = discounted_subtotal - self.discount + self.vat
+        self.final_price = discounted_subtotal + self.vat
 
         super().save(*args, **kwargs)
 

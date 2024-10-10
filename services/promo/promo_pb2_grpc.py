@@ -39,77 +39,93 @@ class PromoServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetProductPromos = channel.unary_unary(
-                '/promo.PromoService/GetProductPromos',
-                request_serializer=promo__pb2.ProductPromoRequest.SerializeToString,
-                response_deserializer=promo__pb2.ProductPromoResponse.FromString,
+        self.CheckItemPromo = channel.unary_unary(
+                '/promo.PromoService/CheckItemPromo',
+                request_serializer=promo__pb2.CheckItemPromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.CheckItemPromoResponse.FromString,
                 _registered_method=True)
-        self.CheckThresholdPromo = channel.unary_unary(
-                '/promo.PromoService/CheckThresholdPromo',
-                request_serializer=promo__pb2.ThresholdPromoRequest.SerializeToString,
-                response_deserializer=promo__pb2.ThresholdPromoResponse.FromString,
+        self.CheckItemsPromos = channel.unary_unary(
+                '/promo.PromoService/CheckItemsPromos',
+                request_serializer=promo__pb2.CheckItemsPromosRequest.SerializeToString,
+                response_deserializer=promo__pb2.CheckItemsPromosResponse.FromString,
                 _registered_method=True)
         self.GetPromoByHash = channel.unary_unary(
                 '/promo.PromoService/GetPromoByHash',
                 request_serializer=promo__pb2.PromoByHashRequest.SerializeToString,
                 response_deserializer=promo__pb2.PromoByHashResponse.FromString,
                 _registered_method=True)
-        self.CreatePromo = channel.unary_unary(
-                '/promo.PromoService/CreatePromo',
-                request_serializer=promo__pb2.CreatePromoRequest.SerializeToString,
-                response_deserializer=promo__pb2.PromoResponse.FromString,
-                _registered_method=True)
-        self.GetPromosByBrandChannelEvent = channel.unary_unary(
-                '/promo.PromoService/GetPromosByBrandChannelEvent',
-                request_serializer=promo__pb2.PromosByBrandChannelEventRequest.SerializeToString,
-                response_deserializer=promo__pb2.PromosByBrandChannelEventResponse.FromString,
-                _registered_method=True)
         self.ListPromos = channel.unary_unary(
                 '/promo.PromoService/ListPromos',
                 request_serializer=promo__pb2.ListPromosRequest.SerializeToString,
                 response_deserializer=promo__pb2.ListPromosResponse.FromString,
-                _registered_method=True)
-        self.UpdatePromo = channel.unary_unary(
-                '/promo.PromoService/UpdatePromo',
-                request_serializer=promo__pb2.UpdatePromoRequest.SerializeToString,
-                response_deserializer=promo__pb2.PromoResponse.FromString,
                 _registered_method=True)
         self.DeletePromo = channel.unary_unary(
                 '/promo.PromoService/DeletePromo',
                 request_serializer=promo__pb2.DeletePromoRequest.SerializeToString,
                 response_deserializer=promo__pb2.DeletePromoResponse.FromString,
                 _registered_method=True)
+        self.CreateDiscountPromo = channel.unary_unary(
+                '/promo.PromoService/CreateDiscountPromo',
+                request_serializer=promo__pb2.CreateDiscountPromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
+        self.UpdateDiscountPromo = channel.unary_unary(
+                '/promo.PromoService/UpdateDiscountPromo',
+                request_serializer=promo__pb2.UpdateDiscountPromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
+        self.CreateBundlePromo = channel.unary_unary(
+                '/promo.PromoService/CreateBundlePromo',
+                request_serializer=promo__pb2.CreateBundlePromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
+        self.UpdateBundlePromo = channel.unary_unary(
+                '/promo.PromoService/UpdateBundlePromo',
+                request_serializer=promo__pb2.UpdateBundlePromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
+        self.CreateThresholdPromo = channel.unary_unary(
+                '/promo.PromoService/CreateThresholdPromo',
+                request_serializer=promo__pb2.CreateThresholdPromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
+        self.UpdateThresholdPromo = channel.unary_unary(
+                '/promo.PromoService/UpdateThresholdPromo',
+                request_serializer=promo__pb2.UpdateThresholdPromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
+        self.CreatePointPurchasePromo = channel.unary_unary(
+                '/promo.PromoService/CreatePointPurchasePromo',
+                request_serializer=promo__pb2.CreatePointPurchasePromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
+        self.UpdatePointPurchasePromo = channel.unary_unary(
+                '/promo.PromoService/UpdatePointPurchasePromo',
+                request_serializer=promo__pb2.UpdatePointPurchasePromoRequest.SerializeToString,
+                response_deserializer=promo__pb2.PromoResponse.FromString,
+                _registered_method=True)
 
 
 class PromoServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetProductPromos(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def CheckItemPromo(self, request, context):
+        """Check promotion for a single item, including discount, point purchase, and optional coupon code
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def CheckThresholdPromo(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+    def CheckItemsPromos(self, request, context):
+        """Check promotion for a list of items to determine bundle or threshold-based promos with optional coupon code
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetPromoByHash(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def CreatePromo(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetPromosByBrandChannelEvent(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Other existing services
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -120,16 +136,57 @@ class PromoServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def UpdatePromo(self, request, context):
-        """Service for updating a promo
+    def DeletePromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateDiscountPromo(self, request, context):
+        """Create/Update Promo types
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DeletePromo(self, request, context):
-        """Service for deleting a promo
-        """
+    def UpdateDiscountPromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateBundlePromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateBundlePromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateThresholdPromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateThresholdPromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreatePointPurchasePromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdatePointPurchasePromo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -137,45 +194,70 @@ class PromoServiceServicer(object):
 
 def add_PromoServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetProductPromos': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetProductPromos,
-                    request_deserializer=promo__pb2.ProductPromoRequest.FromString,
-                    response_serializer=promo__pb2.ProductPromoResponse.SerializeToString,
+            'CheckItemPromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckItemPromo,
+                    request_deserializer=promo__pb2.CheckItemPromoRequest.FromString,
+                    response_serializer=promo__pb2.CheckItemPromoResponse.SerializeToString,
             ),
-            'CheckThresholdPromo': grpc.unary_unary_rpc_method_handler(
-                    servicer.CheckThresholdPromo,
-                    request_deserializer=promo__pb2.ThresholdPromoRequest.FromString,
-                    response_serializer=promo__pb2.ThresholdPromoResponse.SerializeToString,
+            'CheckItemsPromos': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckItemsPromos,
+                    request_deserializer=promo__pb2.CheckItemsPromosRequest.FromString,
+                    response_serializer=promo__pb2.CheckItemsPromosResponse.SerializeToString,
             ),
             'GetPromoByHash': grpc.unary_unary_rpc_method_handler(
                     servicer.GetPromoByHash,
                     request_deserializer=promo__pb2.PromoByHashRequest.FromString,
                     response_serializer=promo__pb2.PromoByHashResponse.SerializeToString,
             ),
-            'CreatePromo': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreatePromo,
-                    request_deserializer=promo__pb2.CreatePromoRequest.FromString,
-                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
-            ),
-            'GetPromosByBrandChannelEvent': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetPromosByBrandChannelEvent,
-                    request_deserializer=promo__pb2.PromosByBrandChannelEventRequest.FromString,
-                    response_serializer=promo__pb2.PromosByBrandChannelEventResponse.SerializeToString,
-            ),
             'ListPromos': grpc.unary_unary_rpc_method_handler(
                     servicer.ListPromos,
                     request_deserializer=promo__pb2.ListPromosRequest.FromString,
                     response_serializer=promo__pb2.ListPromosResponse.SerializeToString,
             ),
-            'UpdatePromo': grpc.unary_unary_rpc_method_handler(
-                    servicer.UpdatePromo,
-                    request_deserializer=promo__pb2.UpdatePromoRequest.FromString,
-                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
-            ),
             'DeletePromo': grpc.unary_unary_rpc_method_handler(
                     servicer.DeletePromo,
                     request_deserializer=promo__pb2.DeletePromoRequest.FromString,
                     response_serializer=promo__pb2.DeletePromoResponse.SerializeToString,
+            ),
+            'CreateDiscountPromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateDiscountPromo,
+                    request_deserializer=promo__pb2.CreateDiscountPromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
+            ),
+            'UpdateDiscountPromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateDiscountPromo,
+                    request_deserializer=promo__pb2.UpdateDiscountPromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
+            ),
+            'CreateBundlePromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateBundlePromo,
+                    request_deserializer=promo__pb2.CreateBundlePromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
+            ),
+            'UpdateBundlePromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateBundlePromo,
+                    request_deserializer=promo__pb2.UpdateBundlePromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
+            ),
+            'CreateThresholdPromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateThresholdPromo,
+                    request_deserializer=promo__pb2.CreateThresholdPromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
+            ),
+            'UpdateThresholdPromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateThresholdPromo,
+                    request_deserializer=promo__pb2.UpdateThresholdPromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
+            ),
+            'CreatePointPurchasePromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreatePointPurchasePromo,
+                    request_deserializer=promo__pb2.CreatePointPurchasePromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
+            ),
+            'UpdatePointPurchasePromo': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdatePointPurchasePromo,
+                    request_deserializer=promo__pb2.UpdatePointPurchasePromoRequest.FromString,
+                    response_serializer=promo__pb2.PromoResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -189,7 +271,7 @@ class PromoService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetProductPromos(request,
+    def CheckItemPromo(request,
             target,
             options=(),
             channel_credentials=None,
@@ -202,9 +284,9 @@ class PromoService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/promo.PromoService/GetProductPromos',
-            promo__pb2.ProductPromoRequest.SerializeToString,
-            promo__pb2.ProductPromoResponse.FromString,
+            '/promo.PromoService/CheckItemPromo',
+            promo__pb2.CheckItemPromoRequest.SerializeToString,
+            promo__pb2.CheckItemPromoResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -216,7 +298,7 @@ class PromoService(object):
             _registered_method=True)
 
     @staticmethod
-    def CheckThresholdPromo(request,
+    def CheckItemsPromos(request,
             target,
             options=(),
             channel_credentials=None,
@@ -229,9 +311,9 @@ class PromoService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/promo.PromoService/CheckThresholdPromo',
-            promo__pb2.ThresholdPromoRequest.SerializeToString,
-            promo__pb2.ThresholdPromoResponse.FromString,
+            '/promo.PromoService/CheckItemsPromos',
+            promo__pb2.CheckItemsPromosRequest.SerializeToString,
+            promo__pb2.CheckItemsPromosResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -270,60 +352,6 @@ class PromoService(object):
             _registered_method=True)
 
     @staticmethod
-    def CreatePromo(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/promo.PromoService/CreatePromo',
-            promo__pb2.CreatePromoRequest.SerializeToString,
-            promo__pb2.PromoResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetPromosByBrandChannelEvent(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/promo.PromoService/GetPromosByBrandChannelEvent',
-            promo__pb2.PromosByBrandChannelEventRequest.SerializeToString,
-            promo__pb2.PromosByBrandChannelEventResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def ListPromos(request,
             target,
             options=(),
@@ -351,33 +379,6 @@ class PromoService(object):
             _registered_method=True)
 
     @staticmethod
-    def UpdatePromo(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/promo.PromoService/UpdatePromo',
-            promo__pb2.UpdatePromoRequest.SerializeToString,
-            promo__pb2.PromoResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def DeletePromo(request,
             target,
             options=(),
@@ -394,6 +395,222 @@ class PromoService(object):
             '/promo.PromoService/DeletePromo',
             promo__pb2.DeletePromoRequest.SerializeToString,
             promo__pb2.DeletePromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateDiscountPromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/CreateDiscountPromo',
+            promo__pb2.CreateDiscountPromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateDiscountPromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/UpdateDiscountPromo',
+            promo__pb2.UpdateDiscountPromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateBundlePromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/CreateBundlePromo',
+            promo__pb2.CreateBundlePromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateBundlePromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/UpdateBundlePromo',
+            promo__pb2.UpdateBundlePromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateThresholdPromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/CreateThresholdPromo',
+            promo__pb2.CreateThresholdPromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateThresholdPromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/UpdateThresholdPromo',
+            promo__pb2.UpdateThresholdPromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreatePointPurchasePromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/CreatePointPurchasePromo',
+            promo__pb2.CreatePointPurchasePromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdatePointPurchasePromo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/promo.PromoService/UpdatePointPurchasePromo',
+            promo__pb2.UpdatePointPurchasePromoRequest.SerializeToString,
+            promo__pb2.PromoResponse.FromString,
             options,
             channel_credentials,
             insecure,
