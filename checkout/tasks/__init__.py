@@ -18,7 +18,7 @@ def send_invoice_to_payment_service_task(invoice_id):
             ewallet_checkout_method='ONE_TIME_PAYMENT',
             invoice_number=invoice.invoice_number,
             agent='OMS',
-            qr_callback_url="https://femaledaily.net/payment_callback",
+            qr_callback_url="https://payment.arnatech.id/payment_callback",
             items=items
         )
     except Invoice.DoesNotExist:

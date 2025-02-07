@@ -82,6 +82,7 @@ class Invoice(models.Model):
         max_length=50, default=QR, choices=PAYMENT_METHOD_CHOICES
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    payment_link = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.invoice_number

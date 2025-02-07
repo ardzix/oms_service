@@ -10,31 +10,46 @@ class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = [
-            'product', 'cart', 'quantity', 'price', 'promo_hash',
-            'modified_price', 'is_bogo', 'bogo_quantity', 'is_point_purchase', 'points_payable', 'hash'
+            'hash',
+            'cart',
+            'product',
+            'quantity',
+            'price',
+            'coupon_code',
+            'promo_hash',
+            'available_promos',
+            'modified_price',
         ]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        
+
         catalogue = CatalogueClient()
         product_hash = instance.product.get_product_hash()
-        product_response = catalogue.get_product(product_hash)
-        product_details = MessageToDict(product_response)
-        if 'variants' in product_details:
-            product_details.pop('variants')
-
-        variant_details = None
-        if instance.product.variant_hash:
-            variant_response = catalogue.get_product_variant(instance.product.variant_hash)
-            variant_details = MessageToDict(variant_response)
-
         representation['product'] = {
-            'type': 'product' if instance.product.product_hash else 'variant',
-            'hash': instance.product.product_hash if instance.product.product_hash else instance.product.variant_hash,
-            'product_details': product_details,
-            'variant_details': variant_details
+            'type': 'product',
+            'hash': product_hash,
+            'name': instance.product.name
         }
+        try:
+            product_response = catalogue.get_product(product_hash)
+            product_details = MessageToDict(product_response)
+            if 'variants' in product_details:
+                product_details.pop('variants')
+
+            variant_details = None
+            if instance.product.variant_hash:
+                variant_response = catalogue.get_product_variant(
+                    instance.product.variant_hash)
+                variant_details = MessageToDict(variant_response)
+
+            
+            representation['product']['type'] = 'product' if instance.product.product_hash else 'variant',
+            representation['product']['hash'] = instance.product.product_hash if instance.product.product_hash else instance.product.variant_hash,
+            representation['product']['product_details'] = product_details,
+            representation['product']['variant_details'] = variant_details
+        except:
+            pass
         representation['cart'] = instance.cart.hash
         return representation
 
@@ -48,9 +63,10 @@ class CartItemSerializer(serializers.ModelSerializer):
                 'price': validated_data['price'],
             }
         )
-        
+
         if not created:
             cart_item.quantity += validated_data['quantity']
+            cart_item.price = validated_data['price']
             cart_item.save()
 
         return cart_item
@@ -59,7 +75,8 @@ class CartItemSerializer(serializers.ModelSerializer):
         # Update an existing CartItem
         instance.quantity = validated_data.get('quantity', instance.quantity)
         instance.price = validated_data.get('price', instance.price)
-        instance.promo_hash = validated_data.get('promo_hash', instance.promo_hash)
+        instance.promo_hash = validated_data.get(
+            'promo_hash', instance.promo_hash)
         try:
             instance.save()
         except Exception as e:
@@ -76,6 +93,7 @@ class CartSerializer(serializers.ModelSerializer):
         fields = [
             'user_hash', 'brand', 'is_active', 'created_at', 'updated_at', 'cart_items', 'hash'
         ]
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['brand'] = instance.brand.hash if instance.brand else None
@@ -86,7 +104,7 @@ class CartSerializer(serializers.ModelSerializer):
         brand = data.get('brand')
         if not brand or not Brand.objects.filter(hash=brand.hash).exists():
             raise ValidationError("Brand does not exist.")
-        
+
         return data
 
     def create(self, validated_data):
@@ -100,7 +118,8 @@ class CartSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # Update an existing Cart
-        instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.is_active = validated_data.get(
+            'is_active', instance.is_active)
         instance.save()
 
         return instance

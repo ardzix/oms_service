@@ -203,6 +203,37 @@ CHANNEL_LAYERS = {
 }
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'libs.middlewares.SSOAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # Default: All views require authentication
+    ],
+    "COERCE_DECIMAL_TO_STRING": False,
+}
+
+# swagger settings
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": 'Token for authentication. Format: "Bearer {token}"',
+        },
+        "LangHeader": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Accept-Language",
+            "description": 'Language preference. Example: "en-us"',
+        },
+    },
+    "SECURITY_REQUIREMENTS": [{"ApiKeyAuth": []}, {"LangHeader": []}],
+    "USE_SESSION_AUTH": False,
+}
+
+
 # Django Q
 Q_CLUSTER = {
     'name': 'DjangoORM',
@@ -237,3 +268,23 @@ OMS_CHECKOUT_SERVICE_PORT = os.getenv('OMS_CHECKOUT_SERVICE_PORT', '50059')
 # Pulsar
 PULSAR_HOST = os.getenv('PULSAR_HOST', 'localhost')
 PULSAR_PORT = os.getenv('PULSAR_PORT', '6650')
+
+
+from datetime import timedelta
+
+# Load the public key for token validation
+with open('public.pem', 'r') as f:
+    public_key = f.read()
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ALGORITHM': 'RS256',
+    'VERIFYING_KEY': public_key,  # Validate tokens with this public key
+}
+
+
+CORS_ORIGIN_ALLOW_ALL = True

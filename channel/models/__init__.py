@@ -55,12 +55,16 @@ class Product(models.Model):
     available = models.BooleanField(default=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     is_valid = models.BooleanField(default=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        name = f"Variant {self.variant_hash}" if self.variant_hash else f"Product {self.product_hash}"
-        return f"{name} on channel {self.channel.name} (event: {self.event})"
+        name = self.name if self.name else f"Variant {self.variant_hash}" if self.variant_hash else f"Product {self.product_hash}"
+        return f"{name} on channel {self.channel.name} (brand: {self.brand} | event: {self.event})"
     
     def get_product_hash(self):
+        if not self.parent or not self.product_hash:
+            return self.hash
         product_hash = self.product_hash if self.product_hash else self.parent.get_product_hash()
         return product_hash
 

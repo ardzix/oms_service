@@ -20,9 +20,6 @@ class CartViewSet(viewsets.ViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "user_hash": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="User hash"
-                ),
                 "brand_hash": openapi.Schema(
                     type=openapi.TYPE_STRING, description="Brand hash"
                 ),
@@ -41,7 +38,7 @@ class CartViewSet(viewsets.ViewSet):
 
         serializer = CartSerializer(
             data={
-                "user_hash": request.data.get("user_hash"),
+                "user_hash": request.user.username,
                 "brand": brand.id,
             }
         )
@@ -101,7 +98,8 @@ class CartViewSet(viewsets.ViewSet):
 
         try:
             product = Product.objects.get(
-                Q(product_hash=request.data.get("product_hash"))
+                Q(hash=request.data.get("product_hash"))
+                | Q(product_hash=request.data.get("product_hash"))
                 | Q(variant_hash=request.data.get("product_hash"))
             )
         except Product.DoesNotExist:

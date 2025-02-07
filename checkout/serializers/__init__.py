@@ -57,4 +57,4 @@ class CheckoutDetailSerializer(CheckoutSerializer):
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
-        fields = ["invoice_number", "status", "created_at"]
+        fields = ["invoice_number", "status", "payment_link", "created_at"]

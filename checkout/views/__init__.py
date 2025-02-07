@@ -22,9 +22,6 @@ class CheckoutViewSet(viewsets.GenericViewSet):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "user_hash": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="User hash"
-                ),
                 "cart_hash": openapi.Schema(
                     type=openapi.TYPE_STRING, description="Cart hash"
                 ),
@@ -43,7 +40,7 @@ class CheckoutViewSet(viewsets.GenericViewSet):
             checkout = CheckoutLib.create_checkout(
                 {
                     "cart": cart.pk,
-                    "user_hash": request.data.get("user_hash"),
+                    "user_hash": request.user.username,
                 }
             )
             return Response(
@@ -54,15 +51,6 @@ class CheckoutViewSet(viewsets.GenericViewSet):
 
     @swagger_auto_schema(
         operation_description="List Brand Channel Products",
-        manual_parameters=[
-            openapi.Parameter(
-                "user_hash",
-                openapi.IN_QUERY,
-                description="User hash",
-                type=openapi.TYPE_STRING,
-                required=True,
-            ),
-        ],
         responses={
             200: CheckoutSerializer(many=True),
             400: "Bad Request",
@@ -70,14 +58,14 @@ class CheckoutViewSet(viewsets.GenericViewSet):
         },
     )
     def list(self, request):
-        user_hash = request.query_params.get("user_hash")
+        user_hash = request.user.username
         checkouts = CheckoutLib.list_checkouts(user_hash)
         serializer = CheckoutSerializer(checkouts, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, hash=None):
         try:
-            checkout = CheckoutLib.get_checkout_detail(hash)
+            checkout, invoice = CheckoutLib.get_checkout_detail(hash)
             checkout_data = CheckoutDetailSerializer(checkout).data
             return Response(checkout_data)
         except ValidationError as e:

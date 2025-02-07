@@ -4,13 +4,14 @@ FROM python:3.11-slim-buster
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Install system dependencies for uWSGI
+# Install system dependencies for uWSGI and Supervisor
 RUN apt-get update && apt-get install -y \
     build-essential \
     python3-dev \
     libpcre3 \
     libpcre3-dev \
     libssl-dev \
+    supervisor \
     && apt-get clean
 
 # Copy the requirements file into the container
@@ -33,17 +34,8 @@ ENV PYTHONUNBUFFERED=1
 # Expose ports for gRPC, Django services, and any other services
 EXPOSE 50057 50058 50059 8001
 
-# Create an entrypoint script to run the Django server, gRPC service, Pulsar listener, and Django-Q cluster
-RUN echo '#!/bin/sh\n\
-python manage.py makemigrations && \
-python manage.py migrate && \
-uwsgi --http :8001 --module oms.wsgi:application --static-map /static=/usr/src/app/static --master --processes 4 --threads 2 & \
-python server.py & \
-python manage.py listen_pulsar & \
-python manage.py qcluster' > /usr/src/app/entrypoint.sh
+# Copy the Supervisor configuration file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Make the entrypoint script executable
-RUN chmod +x /usr/src/app/entrypoint.sh
-
-# Set the entrypoint to run the script
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# Set the entrypoint to run Supervisor
+CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
